@@ -1,16 +1,15 @@
 jQuery(document).ready(function($) {
     $('#btn-buy-now').on('click', function(e) {
         e.preventDefault();
-        
         var nick_id = $(this).data('id');
         var btn = $(this);
 
-        if (!confirm('Xác nhận thanh toán và mua nick này?')) return;
+        if (!confirm('Xác nhận sở hữu Nick này?')) return;
 
         btn.text('ĐANG XỬ LÝ...').prop('disabled', true);
 
         $.ajax({
-            url: shop_ajax.url, // Lấy từ wp_localize_script trong functions.php
+            url: shop_ajax.url,
             type: 'POST',
             data: {
                 action: 'buy_nick_action',
@@ -18,20 +17,14 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    btn.parent().html('<div style="background:#155724; color:#fff; padding:15px; border-radius:8px;">' +
-                        '<h4>MUA THÀNH CÔNG!</h4>' +
-                        '<p>Tài khoản: <strong>' + response.data.account + '</strong></p>' +
-                        '<p>Mật khẩu: <strong>' + response.data.password + '</strong></p>' +
-                        '</div>');
-                    alert('Giao dịch hoàn tất!');
+                    btn.hide();
+                    $('#res-user').text(response.data.account);
+                    $('#res-pass').text(response.data.password);
+                    $('#account-result').fadeIn();
                 } else {
                     alert(response.data);
                     btn.text('MUA NGAY').prop('disabled', false);
                 }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra trong quá trình kết nối!');
-                btn.text('MUA NGAY').prop('disabled', false);
             }
         });
     });

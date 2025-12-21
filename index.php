@@ -1,54 +1,56 @@
 <?php get_header(); ?>
 
-<div class="container main-layout">
-    <aside class="sidebar">
-        <div class="filter-box">
-            <h3><i class="fad fa-filter"></i> BỘ LỌC</h3>
-            <div class="filter-group">
-                <label>Mã số nick</label>
-                <input type="text" placeholder="Tìm theo MS...">
-            </div>
-            <div class="filter-group">
-                <label>Mức giá</label>
-                <select>
-                    <option>Tất cả giá</option>
-                    <option>Dưới 100k</option>
-                    <option>100k - 500k</option>
-                </select>
-            </div>
-        </div>
-    </aside>
+<section class="hero-section">
+    <div class="container">
+        <h1>PUBG MOBILE MARKET</h1>
+        <p>Hệ thống mua bán Nick PUBG tự động, uy tín bậc nhất Việt Nam</p>
+    </div>
+</section>
 
-    <main class="content">
-        <div class="nick-grid">
-            <?php
-            $query = new WP_Query(array('post_type' => 'nick-pubg', 'posts_per_page' => 12));
-            if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+<div class="container">
+    <div class="dyat-grid">
+        <?php
+        $args = array(
+            'post_type' => 'nick-pubg',
+            'posts_per_page' => 12,
+            'meta_query' => array(
+                array('key' => 'is_sold', 'value' => 'no', 'compare' => '=')
+            )
+        );
+        $query = new WP_Query($args);
 
-            <div class="pubg-card">
-                <div class="card-thumb">
-                    <?php if(has_post_thumbnail()): the_post_thumbnail('medium'); else: ?>
-                    <img src="https://via.placeholder.com/300x180/1a1d23/ffffff?text=PUBG+MOBILE" alt="No image">
-                    <?php endif; ?>
-                    <div class="card-ms">#<?php the_ID(); ?></div>
-                </div>
-                <div class="card-body">
-                    <h3 class="card-title"><?php the_title(); ?></h3>
-                    <div class="card-stats">
-                        <div class="stat-item"><i class="fad fa-trophy"></i>
-                            <span><?php the_field('rank_pubg'); ?></span>
+        if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+
+                <div class="dyat-card">
+                    <div class="card-media">
+                        <?php if (has_post_thumbnail()) : the_post_thumbnail('large');
+                        endif; ?>
+                        <div class="ms-tag">#<?php the_ID(); ?></div>
+                    </div>
+
+                    <div class="card-info">
+                        <div class="info-top">
+                            <h3 class="card-name"><?php the_title(); ?></h3>
+                            <i class="fa-regular fa-heart heart-icon"></i>
+                        </div>
+
+                        <div class="bid-label">Giá niêm yết</div>
+
+                        <div class="card-action-row">
+                            <div class="price-pill">
+                                <i class="fas fa-bolt"></i>
+                                <span><?php echo number_format(get_field('gia_ban')); ?>đ</span>
+                            </div>
+                            <a href="<?php the_permalink(); ?>" class="btn-bid">XEM <i class="fas fa-arrow-right-long"></i></a>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="price"><?php echo number_format(get_field('gia_ban')); ?>đ</div>
-                        <a href="<?php the_permalink(); ?>" class="btn-premium">XEM CHI TIẾT</a>
-                    </div>
                 </div>
-            </div>
 
-            <?php endwhile; wp_reset_postdata(); endif; ?>
-        </div>
-    </main>
+        <?php endwhile;
+            wp_reset_postdata();
+        else: echo '<p>Chưa có sản phẩm nào.</p>';
+        endif; ?>
+    </div>
 </div>
 
 <?php get_footer(); ?>

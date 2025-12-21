@@ -1,27 +1,27 @@
 <?php
-// 1. Nhúng các file logic từ thư mục inc/
+// 1. Nhúng các file logic
 require get_template_directory() . '/inc/cpt-setup.php';
 require get_template_directory() . '/inc/wallet-functions.php';
-if (file_exists(get_template_directory() . '/inc/ajax-handle.php')) {
-    require get_template_directory() . '/inc/ajax-handle.php';
-}
+require get_template_directory() . '/inc/ajax-handle.php';
 
 // 2. Nhúng CSS và JS
 function shop_pubg_scripts()
 {
-    // CSS chính với giao diện Premium
+    // Nạp Font từ Google Fonts
+    wp_enqueue_style('google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Rajdhani:wght@600;700&display=swap');
+
+    // Nạp Font Awesome Pro cho các Icon Bid, Wallet
+    wp_enqueue_style('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+    // Nạp CSS chính
     wp_enqueue_style('main-style', get_template_directory_uri() . '/assets/css/style.css');
 
-    // JS xử lý mua hàng AJAX
+    // Nạp JS xử lý mua hàng
     wp_enqueue_script('purchase-js', get_template_directory_uri() . '/assets/js/purchase.js', array('jquery'), null, true);
 
-    // Truyền biến AJAX vào JS
-    wp_localize_script('purchase-js', 'shop_ajax', array(
-        'url' => admin_url('admin-ajax.php')
-    ));
+    wp_localize_script('purchase-js', 'shop_ajax', array('url' => admin_url('admin-ajax.php')));
 }
 add_action('wp_enqueue_scripts', 'shop_pubg_scripts');
 
-// 3. Hỗ trợ ảnh đại diện và các tính năng bổ sung
 add_theme_support('post-thumbnails');
 add_theme_support('title-tag');

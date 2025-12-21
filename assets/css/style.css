@@ -1,49 +1,113 @@
 :root {
-    --primary: #ffc107;
-    --dark-bg: #0b0e11;
-    --card-bg: #1a1d23;
-    --text: #ffffff;
-    --glass: rgba(255, 255, 255, 0.05);
+    --bg-main: #0d0d11;
+    --bg-card: #16161d;
+    --color-accent: #d2ff28; /* Xanh Neon mẫu Dyat */
+    --color-purple: #5a18ee; /* Màu pill giá */
+    --text-white: #ffffff;
+    --text-gray: #88888b;
 }
 
-body { background: var(--dark-bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+body {
+    background-color: var(--bg-main);
+    color: var(--text-white);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
 
-/* Header */
-.main-header { background: rgba(11, 14, 17, 0.95); backdrop-filter: blur(10px); padding: 15px 0; border-bottom: 1px solid var(--glass); position: sticky; top: 0; z-index: 100; }
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- HEADER --- */
+.main-header {
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
 .header-flex { display: flex; justify-content: space-between; align-items: center; }
-.logo a { font-size: 24px; font-weight: 900; color: #fff; text-decoration: none; }
-.logo span { color: var(--primary); }
-.wallet-badge { background: linear-gradient(135deg, var(--primary), #ff9800); color: #000; padding: 8px 18px; border-radius: 50px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-
-/* Card Premium */
-.pubg-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--glass); transition: 0.3s ease-out; }
-.pubg-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(255, 193, 7, 0.15); }
-.card-thumb { position: relative; height: 180px; }
-.card-ms { position: absolute; top: 10px; left: 10px; background: var(--primary); color: #000; padding: 3px 10px; border-radius: 4px; font-weight: 900; font-size: 11px; }
-.card-body { padding: 15px; }
-.price { font-size: 18px; font-weight: 800; color: var(--primary); }
-.btn-premium { background: var(--primary); color: #000; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; }
-
-/* Giao diện trang chi tiết */
-.single-nick-layout { margin-top: 50px; }
-.single-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-
-.main-img-box img { width: 100%; border-radius: 12px; border: 1px solid var(--glass); }
-.gallery-nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
-.gallery-nav img { width: 100%; height: 70px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
-.gallery-nav img:hover { border-color: var(--primary); }
-
-.info-card { background: var(--card-bg); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid var(--glass); }
-.info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-.price-display { text-align: center; margin-bottom: 30px; }
-.price-display .value { font-size: 35px; font-weight: 900; color: var(--primary); }
-
-.btn-buy-premium { 
-    width: 100%; background: var(--primary); color: #000; border: none; 
-    padding: 18px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; transition: 0.3s;
+.logo a { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: #fff; text-decoration: none; }
+.logo span { color: var(--color-accent); }
+.wallet-badge { 
+    background: var(--color-accent); color: #000; padding: 8px 16px; 
+    border-radius: 12px; font-weight: 700; font-family: 'Rajdhani';
 }
-.btn-buy-premium:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-.result-box { background: #155724; color: #fff; padding: 20px; border-radius: 10px; margin-top: 20px; border: 2px dashed var(--primary); }
+/* --- HERO SECTION --- */
+.hero-section { padding: 60px 0; text-align: left; }
+.hero-section h1 { font-family: 'Rajdhani', sans-serif; font-size: 48px; margin: 0; text-transform: uppercase; }
+.hero-section p { color: var(--text-gray); margin-top: 10px; }
+
+/* --- GRID LÀM 4 CỘT --- */
+.dyat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Chia làm 4 cột */
+    gap: 24px;
+    padding-bottom: 80px;
+}
+
+/* --- CARD STYLE DYAT --- */
+.dyat-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: 0.3s ease;
+}
+.dyat-card:hover { transform: translateY(-8px); border-color: var(--color-accent); }
+
+.card-media {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 260px; /* Khống chế chiều cao ảnh */
+}
+.card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ảnh không bị méo */
+}
+.ms-tag {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;
+}
+
+.card-info { padding: 16px 0 4px; }
+.info-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.card-name { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; margin: 0; }
+.heart-icon { color: var(--text-gray); font-size: 18px; }
+
+.bid-label { color: var(--text-gray); font-size: 13px; margin-bottom: 16px; }
+
+.card-action-row { display: flex; justify-content: space-between; align-items: center; }
+
+.price-pill {
+    background: var(--color-purple);
+    padding: 6px 14px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.btn-bid {
+    background: var(--color-accent);
+    color: #000;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Responsive cho điện thoại */
+@media (max-width: 1024px) { .dyat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .dyat-grid { grid-template-columns: 1fr; } }
