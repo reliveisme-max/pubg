@@ -240,3 +240,16 @@ function handle_change_password()
 
     wp_send_json_success('Đổi mật khẩu thành công!');
 }
+
+
+// Thêm vào cuối functions.php
+function get_user_balance_shortcode()
+{
+    if (is_user_logged_in()) {
+        $user_id = get_current_user_id();
+        $balance = (int)get_user_meta($user_id, '_user_balance', true);
+        return '<span class="user-balance-nav"><i class="fa-solid fa-wallet"></i> ' . number_format($balance) . 'đ</span>';
+    }
+    return '';
+}
+add_shortcode('user_balance', 'get_user_balance_shortcode');

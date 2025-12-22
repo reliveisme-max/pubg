@@ -19,13 +19,14 @@ function handle_buy_nick_ajax()
         wp_send_json_error('Nick đã bán!');
     }
 
-    $balance = (int)get_field('user_balance', 'user_' . $user_id);
+    $balance = (int)get_user_meta($user_id, '_user_balance', true);
 
     if ($balance < $price) {
         wp_send_json_error('Số dư không đủ!');
     }
 
     $new_balance = $balance - $price;
+    update_user_meta($user_id, '_user_balance', $new_balance);
     update_field('user_balance', $new_balance, 'user_' . $user_id);
     update_field('is_sold', 'yes', $nick_id);
 

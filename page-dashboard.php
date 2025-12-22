@@ -6,7 +6,8 @@ if (!is_user_logged_in()) {
 }
 get_header();
 $user = wp_get_current_user();
-$balance = get_user_meta($user->ID, '_user_balance', true) ?: 0;
+// Sửa dòng 6 trong page-dashboard.php thành:
+$balance = (int)get_user_meta($user->ID, '_user_balance', true);
 ?>
 
 <div class="container dashboard-wrapper" style="margin-top: 50px; padding-bottom: 80px;">
