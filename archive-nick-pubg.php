@@ -1,109 +1,107 @@
 <?php get_header(); ?>
 
-<section class="hero-section" style="padding: 40px 0 20px;">
-    <div class="container">
-        <h1 style="font-size: 32px;">DANH SÁCH NICK PUBG</h1>
-        <p style="color: #888;">Tìm kiếm tài khoản phù hợp với túi tiền và cấp bậc của bạn</p>
+<div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+
+    <div class="shop-breadcrumb">
+        <a href="<?php echo home_url(); ?>"><i class="fa-solid fa-house"></i> Trang chủ</a>
+        <i class="fa-solid fa-chevron-right separator"></i>
+        <span>Danh sách Nick PUBG</span>
     </div>
-</section>
 
-<div class="container">
-    <div class="dyat-main-layout">
-        <aside class="dyat-sidebar">
-            <div class="filter-card">
-                <h3><i class="fas fa-filter"></i> BỘ LỌC</h3>
-                <form action="<?php echo get_post_type_archive_link('nick-pubg'); ?>" method="GET">
-
-                    <div class="filter-group">
-                        <label>Hạng (Rank)</label>
-                        <select name="rank">
-                            <option value="">Tất cả Rank</option>
-                            <?php 
-                            $ranks = ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương', 'Chí Tôn'];
-                            foreach($ranks as $r): ?>
-                            <option value="<?php echo $r; ?>"
-                                <?php echo (isset($_GET['rank']) && $_GET['rank'] == $r) ? 'selected' : ''; ?>>
-                                <?php echo $r; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label>Khoảng giá</label>
-                        <select name="price_range">
-                            <option value="">Tất cả mức giá</option>
-                            <option value="0-500000"
-                                <?php echo (@$_GET['price_range'] == '0-500000') ? 'selected' : ''; ?>>Dưới 500k
-                            </option>
-                            <option value="500000-2000000"
-                                <?php echo (@$_GET['price_range'] == '500000-2000000') ? 'selected' : ''; ?>>500k - 2tr
-                            </option>
-                            <option value="2000000-999999999"
-                                <?php echo (@$_GET['price_range'] == '2000000-999999999') ? 'selected' : ''; ?>>Trên 2tr
-                            </option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn-filter">ÁP DỤNG</button>
-                    <?php if(!empty($_GET)): ?>
-                    <a href="<?php echo get_post_type_archive_link('nick-pubg'); ?>" class="btn-reset">Xóa lọc</a>
-                    <?php endif; ?>
-                </form>
+    <div class="shop-filter-wrapper">
+        <form action="" method="GET" class="filter-form">
+            <div class="filter-item">
+                <label><i class="fa-solid fa-trophy"></i> BẬC RANK</label>
+                <select name="filter_rank">
+                    <option value="">Tất cả Rank</option>
+                    <?php
+                    $ranks = ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương', 'Cao Thủ', 'Chí Tôn'];
+                    foreach ($ranks as $rank): ?>
+                        <option value="<?php echo $rank; ?>" <?php selected($_GET['filter_rank'], $rank); ?>>
+                            <?php echo $rank; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-        </aside>
 
-        <div class="dyat-content">
-            <div class="dyat-grid">
-                <?php
-                $meta_query = array('relation' => 'AND');
-                $meta_query[] = array('key' => 'is_sold', 'value' => 'no', 'compare' => '=');
+            <div class="filter-item">
+                <label><i class="fa-solid fa-tags"></i> TẦM GIÁ</label>
+                <select name="filter_price">
+                    <option value="">Tất cả giá</option>
+                    <option value="0-100000" <?php selected($_GET['filter_price'], "0-100000"); ?>>Dưới 100k</option>
+                    <option value="100000-500000" <?php selected($_GET['filter_price'], "100000-500000"); ?>>100k - 500k
+                    </option>
+                    <option value="500000-1000000" <?php selected($_GET['filter_price'], "500000-1000000"); ?>>500k - 1M
+                    </option>
+                    <option value="1000000-999999999" <?php selected($_GET['filter_price'], "1000000-999999999"); ?>>
+                        Trên 1M</option>
+                </select>
+            </div>
 
-                if (!empty($_GET['rank'])) {
-                    $meta_query[] = array('key' => 'rank_pubg', 'value' => $_GET['rank'], 'compare' => '=');
-                }
+            <div class="filter-actions">
+                <button type="submit" class="btn-submit-filter">LỌC SẢN PHẨM <i
+                        class="fa-solid fa-magnifying-glass"></i></button>
+                <?php if (isset($_GET['filter_rank']) || isset($_GET['filter_price'])): ?>
+                    <a href="<?php echo get_post_type_archive_link('nick-pubg'); ?>" class="btn-reset-filter">XÓA LỌC</a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
 
-                if (!empty($_GET['price_range'])) {
-                    $range = explode('-', $_GET['price_range']);
-                    $meta_query[] = array('key' => 'gia_ban', 'value' => array($range[0], $range[1]), 'type' => 'NUMERIC', 'compare' => 'BETWEEN');
-                }
-
-                $args = array(
-                    'post_type' => 'nick-pubg',
-                    'posts_per_page' => 12,
-                    'meta_query' => $meta_query,
-                    'paged' => get_query_var('paged') ? get_query_var('paged') : 1
-                );
-
-                $query = new WP_Query($args);
-                if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
-
-                <div class="dyat-card">
-                    <div class="card-media">
-                        <?php if (has_post_thumbnail()) : the_post_thumbnail('large'); endif; ?>
-                        <div class="ms-tag">MS: #<?php the_ID(); ?></div>
+    <div class="dyat-product-grid">
+        <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
+                <div class="product-card">
+                    <div class="card-thumb">
+                        <a href="<?php the_permalink(); ?>">
+                            <?php if (has_post_thumbnail()) : the_post_thumbnail('medium');
+                            else : ?>
+                                <img src="https://via.placeholder.com/300x180" alt="No image">
+                            <?php endif; ?>
+                            <div class="card-ms">MS: #<?php the_ID(); ?></div>
+                        </a>
                     </div>
-                    <div class="card-info">
-                        <div class="info-top">
-                            <h3 class="card-name"><?php the_title(); ?></h3>
-                        </div>
-                        <div class="card-meta-bits">
-                            <span>Rank: <strong><?php the_field('rank_pubg'); ?></strong></span>
-                        </div>
-                        <div class="card-action-row">
-                            <div class="price-pill">
-                                <span><?php echo number_format(get_field('gia_ban')); ?>đ</span>
+
+                    <div class="card-content">
+                        <h3 class="card-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+
+                        <div class="card-specs">
+                            <div class="spec-item"><i class="fa-solid fa-trophy"></i> <?php the_field('rank_pubg'); ?></div>
+                            <div class="spec-item"><i class="fa-solid fa-star"></i> Level: <?php the_field('level_acc'); ?>
                             </div>
-                            <a href="<?php the_permalink(); ?>" class="btn-bid-sm">XEM</a>
+                            <div class="spec-item"><i class="fa-solid fa-gun"></i> Súng: <?php the_field('skin_sung_count'); ?>
+                            </div>
+                            <div class="spec-item"><i class="fa-solid fa-shirt"></i> Áo: <?php the_field('skin_ao_count'); ?>
+                            </div>
+                        </div>
+
+                        <div class="card-price-area">
+                            <?php
+                            $origin = (int)get_field('gia_ban');
+                            $sale = (int)get_field('gia_sale');
+                            ?>
+                            <div class="price-box">
+                                <span class="old-price"><?php echo number_format($origin); ?>đ</span>
+                                <div class="sale-ribbon"><?php echo number_format($sale); ?>đ</div>
+                            </div>
+                            <a href="<?php the_permalink(); ?>" class="btn-detail">CHI TIẾT</a>
                         </div>
                     </div>
                 </div>
-
-                <?php endwhile; wp_reset_postdata(); else: ?>
-                <div class="not-found">Không có sản phẩm nào khớp với bộ lọc.</div>
-                <?php endif; ?>
-            </div>
-        </div>
+            <?php endwhile; ?>
     </div>
+
+    <div class="shop-pagination">
+        <?php
+            echo paginate_links(array(
+                'prev_text' => '<i class="fa-solid fa-chevron-left"></i>',
+                'next_text' => '<i class="fa-solid fa-chevron-right"></i>',
+                'type'      => 'list', // Chuyển về dạng danh sách <ul> <li> để dễ CSS
+            ));
+        ?>
+    </div>
+
+<?php else : ?>
+    <p style="color:#eee; text-align:center;">Không tìm thấy sản phẩm nào khớp với bộ lọc.</p>
+<?php endif; ?>
 </div>
 
 <?php get_footer(); ?>

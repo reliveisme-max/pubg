@@ -13,8 +13,8 @@
                 </div>
                 <?php endwhile; endif; ?>
             </div>
-            <div class="swiper-button-next" style="color:#fff !important;"></div>
-            <div class="swiper-button-prev" style="color:#fff !important;"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
         </div>
     </section>
 
@@ -44,7 +44,7 @@
                         <strong><?php echo get_field('skin_ao_count') ?: '0'; ?></strong>
                     </div>
                     <div class="meta-bit">
-                        <i class="fa-solid fa-star"></i> Lv:
+                        <i class="fa-solid fa-star"></i> Level:
                         <strong><?php echo get_field('level_acc') ?: '0'; ?></strong>
                     </div>
                     <div class="meta-bit">
@@ -69,16 +69,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    new Swiper(".mainSwiper", {
-        loop: true,
-        autoplay: {
-            delay: 4000
-        },
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev"
-        }
-    });
+    if (typeof Swiper !== 'undefined') {
+        new Swiper(".mainSwiper", {
+            loop: true,
+            autoplay: {
+                delay: 4000
+            },
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev"
+            }
+        });
+    }
 });
 </script>
 <?php get_footer(); ?>

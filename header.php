@@ -4,6 +4,16 @@
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Tùy chỉnh màu vàng đồng bộ với web */
+        .swal2-styled.swal2-confirm {
+            background-color: var(--color-accent) !important;
+            color: #000 !important;
+            font-weight: 800;
+        }
+    </style>
     <?php wp_head(); ?>
 </head>
 
