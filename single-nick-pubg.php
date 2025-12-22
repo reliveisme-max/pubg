@@ -1,73 +1,93 @@
 <?php get_header(); ?>
 
-<div class="container" style="margin-top: 30px; padding-bottom: 100px;">
+<div class="container" style="margin-top: 30px; padding-bottom: 80px;">
     <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-            <div class="dyat-single-grid">
-                <div class="gallery-side">
-                    <div class="main-view">
-                        <img src="<?php the_post_thumbnail_url('full'); ?>" id="dyat-expanded" alt="<?php the_title(); ?>">
-                    </div>
+    <div class="dyat-single-grid">
 
-                    <?php
-                    $images = get_field('anh_kho_do');
-                    if ($images): ?>
-                        <div class="thumbs-list">
-                            <div class="thumb-item">
-                                <img src="<?php the_post_thumbnail_url('thumbnail'); ?>"
-                                    onclick="document.getElementById('dyat-expanded').src='<?php the_post_thumbnail_url('full'); ?>'">
-                            </div>
-                            <?php foreach ($images as $img): ?>
-                                <div class="thumb-item">
-                                    <img src="<?php echo $img['sizes']['thumbnail']; ?>"
-                                        onclick="document.getElementById('dyat-expanded').src='<?php echo $img['url']; ?>'">
-                                </div>
-                            <?php endforeach; ?>
+        <div class="gallery-side">
+            <div class="gallery-container">
+                <div class="swiper swiper-detail">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="<?php the_post_thumbnail_url('full'); ?>" alt="Main Thumb">
                         </div>
-                    <?php endif; ?>
+                        <?php 
+                        $images = get_field('anh_kho_do'); 
+                        if($images): foreach($images as $img): ?>
+                        <div class="swiper-slide">
+                            <img src="<?php echo esc_url($img['url']); ?>" alt="Kho do">
+                        </div>
+                        <?php endforeach; endif; ?>
+                    </div>
+                    <div class="swiper-button-next" style="color: #fff;"></div>
+                    <div class="swiper-button-prev" style="color: #fff;"></div>
                 </div>
 
-                <div class="info-side">
-                    <h1 class="dyat-title"><?php the_title(); ?></h1>
-                    <div class="dyat-ms">Mã số: <span>#<?php the_ID(); ?></span></div>
-
-                    <div class="dyat-stats-box">
-                        <div class="stat-line">
-                            <span class="label"><i class="fas fa-trophy"></i> Rank:</span>
-                            <strong class="value"><?php the_field('rank_pubg'); ?></strong>
+                <div class="swiper swiper-thumbs">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="<?php the_post_thumbnail_url('thumbnail'); ?>">
                         </div>
-                        <div class="stat-line">
-                            <span class="label"><i class="fas fa-check-circle"></i> Tình trạng:</span>
-                            <strong class="value" style="color: #00ff00;">SẴN SÀNG</strong>
+                        <?php if($images): foreach($images as $img): ?>
+                        <div class="swiper-slide">
+                            <img src="<?php echo esc_url($img['sizes']['thumbnail']); ?>">
                         </div>
-                    </div>
-
-                    <div class="dyat-price-box">
-                        <span class="price-label">Giá sở hữu ngay</span>
-                        <div class="price-val"><?php echo number_format(get_field('gia_ban')); ?>đ</div>
-                    </div>
-
-                    <div class="dyat-purchase-btn-wrapper">
-                        <?php if (get_field('is_sold') == 'yes'): ?>
-                            <button class="btn-dyat-sold" disabled>ĐÃ BÁN</button>
-                        <?php else: ?>
-                            <button id="btn-buy-now" data-id="<?php the_ID(); ?>" class="btn-dyat-buy">
-                                MUA NGAY <i class="fas fa-shopping-cart"></i>
-                            </button>
-                        <?php endif; ?>
-                    </div>
-
-                    <div id="account-result" class="dyat-result-box" style="display:none;">
-                        <h4><i class="fas fa-gift"></i> GIAO DỊCH THÀNH CÔNG!</h4>
-                        <div class="acc-info">
-                            <p>Tài khoản: <strong id="res-user"></strong></p>
-                            <p>Mật khẩu: <strong id="res-pass"></strong></p>
-                        </div>
-                        <small>Thông tin này đã được lưu vào Lịch sử mua hàng của bạn.</small>
+                        <?php endforeach; endif; ?>
                     </div>
                 </div>
             </div>
-    <?php endwhile;
-    endif; ?>
+        </div>
+
+        <div class="info-side">
+            <div class="ms-label">Mã số: <span
+                    style="color: var(--color-accent); font-weight: 700;">#<?php the_ID(); ?></span></div>
+            <h1><?php the_title(); ?></h1>
+
+            <div style="margin: 20px 0; border-top: 1px solid #333; padding-top: 20px;">
+                <p style="margin: 5px 0;"><i class="fa-solid fa-trophy" style="width:25px; color:#888;"></i> Rank:
+                    <strong><?php the_field('rank_pubg'); ?></strong>
+                </p>
+                <p style="margin: 5px 0;"><i class="fa-solid fa-circle-check" style="width:25px; color:#00ff00;"></i>
+                    Tình trạng: <strong>SẴN SÀNG</strong></p>
+            </div>
+
+            <div class="price-val">
+                <?php echo number_format(get_field('gia_ban'), 0, '.', ','); ?>đ
+            </div>
+
+            <button class="btn-buy-now">
+                MUA NGAY <i class="fa-solid fa-shopping-cart" style="margin-left:10px;"></i>
+            </button>
+
+            <div
+                style="margin-top: 20px; padding: 15px; background: rgba(255,174,0,0.1); border-radius: 8px; border: 1px dashed var(--color-accent); font-size: 13px; color: #ccc;">
+                <i class="fa-solid fa-shield-check"></i> Cam kết nick đúng như hình, bảo hành trọn đời lỗi back.
+            </div>
+        </div>
+
+    </div>
+    <?php endwhile; endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var swiperThumbs = new Swiper(".swiper-thumbs", {
+        spaceBetween: 10,
+        slidesPerView: 5,
+        freeMode: true,
+        watchSlidesProgress: true,
+    });
+    var swiperMain = new Swiper(".swiper-detail", {
+        spaceBetween: 10,
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+        thumbs: {
+            swiper: swiperThumbs,
+        },
+    });
+});
+</script>
 
 <?php get_footer(); ?>
