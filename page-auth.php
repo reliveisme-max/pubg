@@ -1,5 +1,12 @@
 <?php
 /* Template Name: Auth Page */
+
+// Nếu khách đã đăng nhập thì tự động đẩy sang trang Tài khoản
+if (is_user_logged_in()) {
+    wp_redirect(home_url('/tai-khoan/'));
+    exit;
+}
+
 get_header(); ?>
 <div class="container auth-wrapper">
     <div class="auth-card">

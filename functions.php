@@ -24,7 +24,11 @@ function shop_pubg_scripts()
 
     // 4. Nạp JS mua hàng
     wp_enqueue_script('purchase-js', $theme_uri . '/assets/js/purchase.js', array('jquery'), time(), true);
-    wp_localize_script('purchase-js', 'shop_ajax', array('url' => admin_url('admin-ajax.php')));
+    // Tìm hàm shop_pubg_scripts và sửa dòng localize
+    wp_localize_script('purchase-js', 'shop_ajax', array(
+        'url'      => admin_url('admin-ajax.php'),
+        'home_url' => home_url() // BẠN ĐANG THIẾU DÒNG NÀY
+    ));
 }
 add_action('wp_enqueue_scripts', 'shop_pubg_scripts');
 

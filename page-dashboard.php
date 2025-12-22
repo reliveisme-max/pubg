@@ -1,5 +1,9 @@
 <?php
 /* Template Name: Dashboard Cá Nhân */
+if (!is_user_logged_in()) {
+    wp_redirect(home_url('/auth/'));
+    exit;
+}
 get_header();
 $user = wp_get_current_user();
 $balance = get_user_meta($user->ID, '_user_balance', true) ?: 0;

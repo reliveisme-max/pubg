@@ -102,9 +102,18 @@
                             <div class="price-ribbon-single"><?php echo number_format($price_origin); ?>đ</div>
                         <?php endif; ?>
 
-                        <button class="btn-buy-now-single" id="btn-buy-now" data-id="<?php the_ID(); ?>">
-                            XÁC NHẬN MUA NGAY <i class="fa-solid fa-cart-shopping"></i>
-                        </button>
+                        <div class="purchase-action-wrapper">
+                            <?php if (is_user_logged_in()) : ?>
+                                <button class="btn-buy-now-single" id="btn-buy-now" data-id="<?php the_ID(); ?>">
+                                    XÁC NHẬN MUA NGAY <i class="fa-solid fa-cart-shopping"></i>
+                                </button>
+                            <?php else : ?>
+                                <a href="<?php echo home_url('/auth/'); ?>" class="btn-buy-now-single btn-login-to-buy"
+                                    style="text-decoration: none; display: block; background: #333 !important; color: #fff !important; text-align: center;">
+                                    ĐĂNG NHẬP ĐỂ MUA <i class="fa-solid fa-right-to-bracket"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <div class="guarantee-note">

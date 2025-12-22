@@ -7,12 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Tùy chỉnh màu vàng đồng bộ với web */
-        .swal2-styled.swal2-confirm {
-            background-color: var(--color-accent) !important;
-            color: #000 !important;
-            font-weight: 800;
-        }
+    /* Tùy chỉnh màu vàng đồng bộ với web */
+    .swal2-styled.swal2-confirm {
+        background-color: var(--color-accent) !important;
+        color: #000 !important;
+        font-weight: 800;
+    }
     </style>
     <?php wp_head(); ?>
 </head>
@@ -38,7 +38,7 @@
                         <div class="icon-item"><i class="far fa-bell"></i></div>
                         <div class="icon-item"><i class="fas fa-shopping-cart"></i><span class="badge">0</span></div>
                         <div class="icon-item">
-                            <a href="<?php echo is_user_logged_in() ? home_url('/account') : wp_login_url(); ?>">
+                            <a href="<?php echo is_user_logged_in() ? home_url('/tai-khoan/') : home_url('/auth/'); ?>">
                                 <i class="far fa-user"></i>
                             </a>
                         </div>
