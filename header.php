@@ -35,8 +35,9 @@
                 <div class="header-actions">
                     <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit">Nạp Tiền</a>
                     <div class="action-icons">
-                        <div class="icon-item"><i class="far fa-bell"></i></div>
-                        <div class="icon-item"><i class="fas fa-shopping-cart"></i><span class="badge">0</span></div>
+                        <div class="user-balance-item">
+                            <?php echo do_shortcode('[user_balance]'); ?>
+                        </div>
                         <div class="icon-item">
                             <a href="<?php echo is_user_logged_in() ? home_url('/tai-khoan/') : home_url('/auth/'); ?>">
                                 <i class="far fa-user"></i>
