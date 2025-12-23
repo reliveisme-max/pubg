@@ -39,8 +39,7 @@
                     <?php if (is_user_logged_in()) : ?>
                     <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit">Nạp Tiền</a>
                     <?php else : ?>
-                    <a href="<?php echo home_url('/auth/'); ?>" class="btn-deposit"
-                        style="background: #333 !important;">Nạp Tiền</a>
+                    <a href="<?php echo home_url('/auth/'); ?>" class="btn-deposit">Nạp Tiền</a>
                     <?php endif; ?>
 
                     <div class="action-icons">

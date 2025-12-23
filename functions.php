@@ -553,3 +553,60 @@ function vnpay_check_return()
         }
     }
 }
+
+
+/**
+ * 9. LOGIC QUÊN MẬT KHẨU (GỬI OTP & RESET)
+ */
+
+// Gửi OTP Quên mật khẩu
+add_action('wp_ajax_nopriv_forgot_pass_otp_action', 'handle_forgot_pass_otp');
+function handle_forgot_pass_otp()
+{
+    $email = sanitize_email($_POST['email']);
+    if (!email_exists($email)) {
+        wp_send_json_error('Email này không tồn tại trên hệ thống!');
+    }
+
+    $otp = rand(100000, 999999);
+    $_SESSION['forgot_otp'] = $otp;
+    $_SESSION['forgot_email'] = $email;
+
+    $subject = "MA KHOI PHUC MAT KHAU - SHOPTULE";
+    $message = "Mã xác minh khôi phục mật khẩu của bạn là: $otp. Đừng chia sẻ mã này cho bất kỳ ai.";
+
+    if (wp_mail($email, $subject, $message)) {
+        wp_send_json_success('Mã khôi phục đã được gửi vào Email của bạn!');
+    } else {
+        wp_send_json_error('Lỗi gửi mail, vui lòng thử lại sau!');
+    }
+}
+
+// Thực hiện đặt lại mật khẩu
+add_action('wp_ajax_nopriv_reset_password_action', 'handle_reset_password');
+function handle_reset_password()
+{
+    $email = sanitize_email($_POST['forgot_email']);
+    $otp = sanitize_text_field($_POST['otp_code_forgot']);
+    $new_pass = $_POST['new_password_forgot'];
+
+    if (!isset($_SESSION['forgot_otp']) || $otp != $_SESSION['forgot_otp']) {
+        wp_send_json_error('Mã OTP không chính xác!');
+    }
+    if ($email != $_SESSION['forgot_email']) {
+        wp_send_json_error('Email không khớp với yêu cầu!');
+    }
+    if (strlen($new_pass) < 6) {
+        wp_send_json_error('Mật khẩu mới phải từ 6 ký tự trở lên!');
+    }
+
+    $user = get_user_by('email', $email);
+    if ($user) {
+        wp_set_password($new_pass, $user->ID);
+        unset($_SESSION['forgot_otp']);
+        unset($_SESSION['forgot_email']);
+        wp_send_json_success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
+    } else {
+        wp_send_json_error('Có lỗi xảy ra, không tìm thấy người dùng.');
+    }
+}

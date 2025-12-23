@@ -159,3 +159,80 @@ jQuery(document).ready(function($) {
         }, 1500);
     });
 });
+
+/**
+ * XỬ LÝ ẨN/HIỆN MẬT KHẨU
+ */
+$(document).on('click', '.toggle-password-icon', function() {
+    var input = $(this).siblings('input');
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+});
+
+/* --- JS RIÊNG CHO QUÊN MẬT KHẨU --- */
+
+// 1. Click hiện form quên mật khẩu
+$(document).on('click', '#show-forgot-form', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $('.auth-form-box').hide(); // Ẩn Login/Register
+    $('.auth-tab').removeClass('active');
+    $('#forgot-form').stop().fadeIn(); // Hiện Quên mật khẩu
+});
+
+// 2. Quay lại đăng nhập
+$(document).on('click', '.back-to-login', function(e) {
+    e.preventDefault();
+    $('#forgot-form').hide();
+    $('#login-form').fadeIn();
+    $('.auth-tab[data-target="login-form"]').addClass('active');
+});
+
+// 3. Gửi mã OTP Quên mật khẩu
+$('#btn-send-otp-forgot').on('click', function() {
+    var email = $('#forgot_email').val();
+    if(!email) { 
+        Swal.fire({ icon: 'error', text: 'Nhập email của bạn!', background: '#111', color: '#fff' });
+        return; 
+    }
+    var btn = $(this);
+    btn.prop('disabled', true).text('ĐANG GỬI...');
+    
+    $.post(shop_ajax.url, { action: 'forgot_pass_otp_action', email: email }, function(res) {
+        if(res.success) {
+            Swal.fire({ icon: 'success', text: res.data, background: '#111', color: '#fff' });
+            var sec = 60;
+            var timer = setInterval(function() {
+                sec--; btn.text('GỬI LẠI ('+sec+'s)');
+                if(sec <= 0) { clearInterval(timer); btn.prop('disabled', false).text('GỬI MÃ'); }
+            }, 1000);
+        } else { 
+            Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
+            btn.prop('disabled', false).text('GỬI MÃ'); 
+        }
+    });
+});
+
+// 4. Submit đặt lại mật khẩu mới
+$('#forgot-form').on('submit', function(e) {
+    e.preventDefault();
+    var data = $(this).serialize() + '&action=reset_password_action';
+    var btn = $(this).find('button[type="submit"]');
+    btn.prop('disabled', true).text('ĐANG CẬP NHẬT...');
+
+    $.post(shop_ajax.url, data, function(res) {
+        if (res.success) {
+            Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' }).then(() => {
+                location.reload(); 
+            });
+        } else {
+            Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
+            btn.prop('disabled', false).text('XÁC NHẬN ĐỔI MẬT KHẨU');
+        }
+    });
+});
