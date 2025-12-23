@@ -175,20 +175,13 @@ function handle_buy_nick_logic()
     wp_die();
 }
 
-// 6. TỰ ĐỘNG ẨN NICK ĐÃ BÁN Ở CÁC TRANG DANH MỤC
-add_action('pre_get_posts', function ($query) {
-    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('nick-pubg') || is_tax())) {
-        $query->set('meta_query', array(
-            array('key' => 'is_sold', 'value' => 'yes', 'compare' => '!=')
-        ));
-    }
-});
 // 6. SHORTCODE HIỂN THỊ SỐ DƯ (ĐÃ FIX LỖI PHP 8)
 function get_user_balance_shortcode()
 {
     if (is_user_logged_in()) {
         $user_id = get_current_user_id();
-        $balance = (int)get_user_meta($user_id, 'user_balance', true); // Ép kiểu (int) để tránh lỗi number_format
+        // Dùng get_field của ACF cho đồng bộ tuyệt đối
+        $balance = (int)get_field('user_balance', 'user_' . $user_id);
         return '<span class="user-balance-nav"><i class="fa-solid fa-wallet"></i> ' . number_format($balance) . 'đ</span>';
     }
     return '';
@@ -428,17 +421,11 @@ function shoptule_admin_wallet_js()
 <?php
 }
 
-
-// Tự động ẩn Nick đã bán khỏi các trang danh sách
+// Tự động đẩy Nick đã bán xuống cuối ở trang danh mục
 add_action('pre_get_posts', function ($query) {
-    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('nick-pubg') || is_tax())) {
-        $meta_query = array(
-            array(
-                'key'     => 'is_sold',
-                'value'   => 'yes',
-                'compare' => '!='
-            )
-        );
-        $query->set('meta_query', $meta_query);
+    if (!is_admin() && $query->is_main_query() && is_post_type_archive('nick-pubg')) {
+        $query->set('meta_key', 'is_sold');
+        $query->set('orderby', 'meta_value');
+        $query->set('order', 'ASC');
     }
 });

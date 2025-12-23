@@ -63,15 +63,20 @@
                     <div class="dyat-grid">
                         <?php if ($sec_products): ?>
                             <?php foreach ($sec_products as $post): setup_postdata($post);
-                                if (get_field('is_sold', $post->ID) === 'yes') continue;
+                                // Kiểm tra trạng thái bán
+                                $is_sold_acc = (get_field('is_sold', $post->ID) === 'yes' || get_field('is_sold', $post->ID) === 'Đã bán');
                                 $price_origin = (int)get_field('gia_ban');
                                 $price_sale   = (int)get_field('gia_sale'); ?>
-                                <div class="dyat-card">
+                                <div class="dyat-card <?php echo $is_sold_acc ? 'is-sold-acc' : ''; ?>">
                                     <a href="<?php the_permalink(); ?>" class="card-link-overlay"></a>
                                     <div class="card-media">
                                         <?php if (has_post_thumbnail()) : the_post_thumbnail('large');
                                         endif; ?>
                                         <div class="ms-tag">MS: #<?php the_ID(); ?></div>
+
+                                        <?php if ($is_sold_acc) : ?>
+                                            <div class="sold-badge-circle">ĐÃ BÁN</div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="card-info">
                                         <h3 class="card-name"><?php the_title(); ?></h3>
@@ -118,22 +123,27 @@
                 'post_type'      => 'nick-pubg',
                 'posts_per_page' => 12,
                 'paged'          => $paged,
-                'meta_query'     => array(
-                    array('key' => 'is_sold', 'value' => 'no', 'compare' => '=')
-                )
+                'meta_key'       => 'is_sold', // Sắp xếp theo trạng thái bán
+                'orderby'        => 'meta_value',
+                'order'          => 'ASC' // 'no' sẽ lên trước 'yes'
             );
             $query = new WP_Query($args);
 
             if ($query->have_posts()) :
                 while ($query->have_posts()) : $query->the_post();
+                    $is_sold_acc = (get_field('is_sold') === 'yes' || get_field('is_sold') === 'Đã bán');
                     $price_origin = (int)get_field('gia_ban');
                     $price_sale   = (int)get_field('gia_sale'); ?>
-                    <div class="dyat-card">
+                    <div class="dyat-card <?php echo $is_sold_acc ? 'is-sold-acc' : ''; ?>">
                         <a href="<?php the_permalink(); ?>" class="card-link-overlay"></a>
                         <div class="card-media">
                             <?php if (has_post_thumbnail()) : the_post_thumbnail('large');
                             endif; ?>
                             <div class="ms-tag">MS: #<?php the_ID(); ?></div>
+
+                            <?php if ($is_sold_acc) : ?>
+                                <div class="sold-badge-circle">ĐÃ BÁN</div>
+                            <?php endif; ?>
                         </div>
                         <div class="card-info">
                             <h3 class="card-name"><?php the_title(); ?></h3>
