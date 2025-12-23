@@ -4,10 +4,10 @@
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-    /* Tùy chỉnh màu vàng đồng bộ với web */
     .swal2-styled.swal2-confirm {
         background-color: var(--color-accent) !important;
         color: #000 !important;
@@ -28,16 +28,22 @@
                 </div>
                 <div class="header-search">
                     <form role="search" method="get" action="<?php echo home_url('/'); ?>">
-                        <input type="text" placeholder="Tìm kiếm tài khoản..." name="s">
+                        <input type="text" placeholder="Tìm kiếm tài khoản..." name="s"
+                            value="<?php echo get_search_query(); ?>">
+                        <input type="hidden" name="post_type" value="nick-pubg">
                         <button type="submit"><i class="fas fa-search"></i></button>
                     </form>
                 </div>
                 <div class="header-actions">
+                    <?php if (is_user_logged_in()) : ?>
                     <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit">Nạp Tiền</a>
+                    <?php else : ?>
+                    <a href="<?php echo home_url('/auth/'); ?>" class="btn-deposit"
+                        style="background: #333 !important;">Nạp Tiền</a>
+                    <?php endif; ?>
+
                     <div class="action-icons">
-                        <div class="user-balance-item">
-                            <?php echo do_shortcode('[user_balance]'); ?>
-                        </div>
+                        <?php echo do_shortcode('[user_balance]'); ?>
                         <div class="icon-item">
                             <a href="<?php echo is_user_logged_in() ? home_url('/tai-khoan/') : home_url('/auth/'); ?>">
                                 <i class="far fa-user"></i>
