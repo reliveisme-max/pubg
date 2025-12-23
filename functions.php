@@ -421,11 +421,135 @@ function shoptule_admin_wallet_js()
 <?php
 }
 
-// Tự động đẩy Nick đã bán xuống cuối ở trang danh mục
+// LOGIC BỘ LỌC NÂNG CAO CHO NICK PUBG
 add_action('pre_get_posts', function ($query) {
     if (!is_admin() && $query->is_main_query() && is_post_type_archive('nick-pubg')) {
+        $meta_query = array('relation' => 'AND');
+
+        // Lọc Rank
+        if (!empty($_GET['filter_rank'])) {
+            $meta_query[] = array('key' => 'rank_pubg', 'value' => sanitize_text_field($_GET['filter_rank']), 'compare' => '=');
+        }
+
+        // Lọc Giá
+        if (!empty($_GET['filter_price'])) {
+            $range = explode('-', $_GET['filter_price']);
+            $meta_query[] = array('key' => 'gia_ban', 'value' => array($range[0], $range[1]), 'type' => 'numeric', 'compare' => 'BETWEEN');
+        }
+
+        // Lọc Súng nâng cấp
+        if (!empty($_GET['filter_gun'])) {
+            if ($_GET['filter_gun'] == 'yes') {
+                $meta_query[] = array('key' => 'sung_nang_cap', 'value' => '', 'compare' => '!=');
+            } else {
+                $meta_query[] = array('key' => 'sung_nang_cap', 'value' => '', 'compare' => '=');
+            }
+        }
+
+        // Lọc Server
+        if (!empty($_GET['filter_server'])) {
+            $meta_query[] = array('key' => 'server_pubg', 'value' => sanitize_text_field($_GET['filter_server']), 'compare' => '=');
+        }
+
+        // Sắp xếp: Chưa bán lên trước, Mới đăng lên đầu
         $query->set('meta_key', 'is_sold');
-        $query->set('orderby', 'meta_value');
-        $query->set('order', 'ASC');
+        $query->set('orderby', array('meta_value' => 'ASC', 'date' => 'DESC'));
+        $query->set('meta_query', $meta_query);
     }
 });
+
+
+/**
+ * SECTION: CẤU HÌNH VN PAY (KEY RIÊNG CỦA BẠN)
+ */
+define('VNP_TMNCODE', 'YXHMOC0S'); // Mã Terminal ID bạn gửi
+define('VNP_HASHSECRET', '30HXXM2N7EN6323EVS6PKOMF1SW9WNW6'); // Chuỗi Secret bạn gửi
+define('VNP_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html');
+define('VNP_RETURNURL', home_url('/nap-tien/?vnpay=return'));
+
+// AJAX Tạo URL thanh toán
+add_action('wp_ajax_vnpay_create_payment', 'vnpay_create_payment_handler');
+function vnpay_create_payment_handler()
+{
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Vui lòng đăng nhập!');
+    }
+
+    $amount = intval($_POST['amount']);
+    if ($amount < 10000) {
+        wp_send_json_error('Số tiền tối thiểu là 10.000đ');
+    }
+
+    $vnp_TxnRef = time();
+    $vnp_OrderInfo = "Nap tien cho tai khoan: " . wp_get_current_user()->user_login;
+    $vnp_OrderType = 'billpayment';
+    $vnp_Amount = $amount * 100;
+    $vnp_Locale = 'vn';
+    $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+
+    $inputData = array(
+        "vnp_Version" => "2.1.0",
+        "vnp_TmnCode" => VNP_TMNCODE,
+        "vnp_Amount" => $vnp_Amount,
+        "vnp_Command" => "pay",
+        "vnp_CreateDate" => date('YmdHis'),
+        "vnp_CurrCode" => "VND",
+        "vnp_IpAddr" => $vnp_IpAddr,
+        "vnp_Locale" => $vnp_Locale,
+        "vnp_OrderInfo" => $vnp_OrderInfo,
+        "vnp_OrderType" => $vnp_OrderType,
+        "vnp_ReturnUrl" => VNP_RETURNURL,
+        "vnp_TxnRef" => $vnp_TxnRef,
+    );
+
+    ksort($inputData);
+    $query = "";
+    $i = 0;
+    $hashdata = "";
+    foreach ($inputData as $key => $value) {
+        if ($i == 1) {
+            $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+        } else {
+            $hashdata .= urlencode($key) . "=" . urlencode($value);
+            $i = 1;
+        }
+        $query .= urlencode($key) . "=" . urlencode($value) . '&';
+    }
+
+    $vnp_Url = VNP_URL . "?" . $query;
+    $vnpSecureHash = hash_hmac('sha512', $hashdata, VNP_HASHSECRET);
+    $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+
+    wp_send_json_success($vnp_Url);
+}
+
+// Kiểm tra kết quả trả về
+add_action('template_redirect', 'vnpay_check_return');
+function vnpay_check_return()
+{
+    if (isset($_GET['vnp_ResponseCode']) && isset($_GET['vnpay']) && $_GET['vnpay'] == 'return') {
+        $vnp_ResponseCode = $_GET['vnp_ResponseCode'];
+        $vnp_Amount = $_GET['vnp_Amount'] / 100;
+        $user_id = get_current_user_id();
+
+        if ($vnp_ResponseCode == "00") {
+            $current_balance = (int)get_field('user_balance', 'user_' . $user_id);
+            $new_balance = $current_balance + $vnp_Amount;
+            update_field('user_balance', $new_balance, 'user_' . $user_id);
+
+            add_row('lich_su_giao_dich', array(
+                'ngay' => date('H:i - d/m/Y'),
+                'loai' => 'Cộng tiền',
+                'so_tien' => '+' . number_format($vnp_Amount) . 'đ',
+                'noi_dung' => 'Nạp tiền VNPay thành công (Mã: ' . $_GET['vnp_TxnRef'] . ')',
+                'so_du_cuoi' => number_format($new_balance) . 'đ'
+            ), 'user_' . $user_id);
+
+            wp_redirect(home_url('/tai-khoan/?status=success&amount=' . $vnp_Amount));
+            exit;
+        } else {
+            wp_redirect(home_url('/nap-tien/?status=error'));
+            exit;
+        }
+    }
+}
