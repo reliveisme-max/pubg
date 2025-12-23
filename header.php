@@ -4,7 +4,6 @@
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -23,7 +22,7 @@
             <div class="header-top">
                 <div class="logo">
                     <a href="<?php echo home_url(); ?>">
-                        <img src="https://pubg.shoprito.com/assets/img/logo.png" alt="Logo">
+                        <img src="https://cdn3.upanh.info/upload/server-sw3/images/u.png" alt="Logo">
                     </a>
                 </div>
                 <div class="header-search">
@@ -35,6 +34,8 @@
                     </form>
                 </div>
                 <div class="header-actions">
+                    <?php echo do_shortcode('[user_balance]'); ?>
+
                     <?php if (is_user_logged_in()) : ?>
                     <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit">Nạp Tiền</a>
                     <?php else : ?>
@@ -43,7 +44,6 @@
                     <?php endif; ?>
 
                     <div class="action-icons">
-                        <?php echo do_shortcode('[user_balance]'); ?>
                         <div class="icon-item">
                             <a href="<?php echo is_user_logged_in() ? home_url('/tai-khoan/') : home_url('/auth/'); ?>">
                                 <i class="far fa-user"></i>

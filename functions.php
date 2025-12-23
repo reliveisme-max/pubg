@@ -185,3 +185,206 @@ function handle_change_password()
     wp_set_auth_cookie($user_id);
     wp_send_json_success('Đổi mật khẩu thành công!');
 }
+
+// Kích hoạt trang Options để chỉnh Slider và Banner
+if (function_exists('acf_add_options_page')) {
+    acf_add_options_page(array(
+        'page_title'    => 'Cấu hình Banner',
+        'menu_title'    => 'Cấu hình Banner',
+        'menu_slug'     => 'acf-options', // Slug này phải khớp với giá trị "value" trong file JSON đã import
+        'capability'    => 'edit_posts',
+        'redirect'      => false
+    ));
+}
+
+
+/**
+ * Dọn dẹp và làm đẹp trang cá nhân thành viên
+ */
+add_action('admin_head', 'shoptule_clean_user_profile_ui');
+function shoptule_clean_user_profile_ui()
+{
+    // Chỉ chạy trong trang chỉnh sửa User
+    $screen = get_current_screen();
+    if ($screen->id !== 'profile' && $screen->id !== 'user-edit') return;
+?>
+    <style>
+        /* 1. Ẩn toàn bộ các mục mặc định rườm rà của WordPress */
+        #profile-page h2,
+        .user-rich-editing-wrap,
+        .user-admin-bar-front-wrap,
+        .user-syntax-highlighting-wrap,
+        .user-comment-shortcuts-wrap,
+        .user-admin-color-wrap,
+        .user-first-name-wrap,
+        .user-last-name-wrap,
+        .user-nickname-wrap,
+        .user-display-name-wrap,
+        .user-email-wrap,
+        .user-url-wrap,
+        .user-description-wrap,
+        .user-profile-picture-wrap,
+        .user-language-wrap,
+        .user-sessions-wrap {
+            display: none !important;
+        }
+
+        /* 2. Làm đẹp vùng ACF User */
+        .acf-field-setting-fc {
+            background: #f9f9f9;
+        }
+
+        #poststuff {
+            padding-top: 0;
+        }
+
+        /* 3. Tùy chỉnh riêng cho ô Số dư tài khoản */
+        .acf-field[data-name="so_du_tai_khoan"] input {
+            font-size: 20px !important;
+            font-weight: bold !important;
+            color: #d35400 !important;
+            border: 2px solid #e67e22 !important;
+            padding: 10px !important;
+        }
+    </style>
+<?php
+}
+
+
+
+/**
+ * 1. Hiển thị cột Số dư vào danh sách Thành viên Admin
+ */
+add_filter('manage_users_columns', 'shoptule_add_user_balance_column');
+function shoptule_add_user_balance_column($columns)
+{
+    $columns['user_balance'] = 'Số dư ví';
+    return $columns;
+}
+add_filter('manage_users_custom_column', 'shoptule_show_user_balance_content', 10, 3);
+function shoptule_show_user_balance_content($value, $column_name, $user_id)
+{
+    if ('user_balance' == $column_name) {
+        $balance = get_field('user_balance', 'user_' . $user_id);
+        return '<span style="font-weight:bold; color:#27ae60">' . number_format((int)$balance ?: 0) . 'đ</span>';
+    }
+    return $value;
+}
+
+/**
+ * 2. Vẽ bảng thống kê số dư toàn bộ thành viên
+ */
+add_filter('acf/load_field/key=field_user_balance_dashboard', 'shoptule_render_user_balance_table');
+function shoptule_render_user_balance_table($field)
+{
+    $users = get_users(array('fields' => array('ID', 'user_login', 'display_name')));
+    $html = '<div style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">';
+    $html .= '<table style="width: 100%; border-collapse: collapse; color: #ccc; font-size: 13px;">';
+    $html .= '<thead style="background: #2c3e50; color: #fff;"><tr>';
+    $html .= '<th style="padding: 12px; text-align: left;">Username</th><th style="padding: 12px; text-align: left;">Tên hiển thị</th><th style="padding: 12px; text-align: right;">Số dư hiện tại</th>';
+    $html .= '</tr></thead><tbody>';
+    foreach ($users as $user) {
+        $balance = get_field('user_balance', 'user_' . $user->ID);
+        $html .= '<tr style="border-bottom: 1px solid #333;">';
+        $html .= '<td style="padding: 10px 12px; color: #f39c12;">' . esc_html($user->user_login) . '</td>';
+        $html .= '<td style="padding: 10px 12px;">' . esc_html($user->display_name) . '</td>';
+        $html .= '<td style="padding: 10px 12px; text-align: right; font-weight: bold; color: #2ecc71;">' . number_format((int)$balance ?: 0) . 'đ</td>';
+        $html .= '</tr>';
+    }
+    $html .= '</tbody></table></div>';
+    $field['message'] = $html;
+    return $field;
+}
+
+/**
+ * 3. Xử lý Nạp/Rút tiền và TỰ ĐỘNG GHI LỊCH SỬ
+ */
+add_action('acf/save_post', 'shoptule_sync_member_data_from_options', 20);
+function shoptule_sync_member_data_from_options($post_id)
+{
+    if ($post_id !== 'options') return;
+
+    $user_list = get_field('quick_user_list', 'option');
+
+    if (is_array($user_list) && !empty($user_list)) {
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+        $current_time = date('H:i - d/m/Y');
+
+        foreach ($user_list as $row) {
+            $user_id = $row['target_user'];
+            $action  = $row['action_type']; // 'plus' hoặc 'minus'
+            $amount  = (int)$row['target_amount'];
+
+            if ($user_id && $amount > 0) {
+                $old_balance = (int)get_field('user_balance', 'user_' . $user_id);
+
+                if ($action === 'minus') {
+                    $new_total = max(0, $old_balance - $amount);
+                    $type_text = 'Trừ tiền';
+                    $amount_text = '-' . number_format($amount) . 'đ';
+                } else {
+                    $new_total = $old_balance + $amount;
+                    $type_text = 'Cộng tiền';
+                    $amount_text = '+' . number_format($amount) . 'đ';
+                }
+
+                // Cập nhật số dư
+                update_field('user_balance', $new_total, 'user_' . $user_id);
+
+                // GHI LỊCH SỬ GIAO DỊCH VÀO USER
+                $history_row = array(
+                    'ngay'       => $current_time,
+                    'loai'       => $type_text,
+                    'so_tien'    => $amount_text,
+                    'noi_dung'   => 'Admin điều chỉnh số dư',
+                    'so_du_cuoi' => number_format($new_total) . 'đ'
+                );
+                add_row('lich_su_giao_dich', $history_row, 'user_' . $user_id);
+
+                // Đổi mật khẩu nếu có nhập
+                if (!empty($row['target_password'])) wp_set_password($row['target_password'], $user_id);
+            }
+        }
+        update_field('quick_user_list', array(), 'option');
+    }
+}
+
+/**
+ * 4. AJAX & Script hiển thị số dư nhanh
+ */
+add_action('wp_ajax_get_user_balance_quick', 'shoptule_ajax_get_balance');
+function shoptule_ajax_get_balance()
+{
+    $user_id = intval($_POST['user_id']);
+    $balance = get_field('user_balance', 'user_' . $user_id);
+    echo number_format((int)$balance ?: 0) . 'đ';
+    wp_die();
+}
+
+add_action('admin_footer', 'shoptule_admin_wallet_js');
+function shoptule_admin_wallet_js()
+{
+?>
+    <script type="text/javascript">
+        (function($) {
+            $(document).on('change', '.acf-field[data-name="target_user"] select', function() {
+                var $row = $(this).closest('.acf-row');
+                var userId = $(this).val();
+                if (userId) {
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'get_user_balance_quick',
+                            user_id: userId
+                        },
+                        success: function(res) {
+                            $row.find('.acf-field[data-name="current_balance_display"] input').val(res);
+                        }
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+<?php
+}
