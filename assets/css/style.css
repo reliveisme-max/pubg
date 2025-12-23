@@ -1081,27 +1081,508 @@ table thead tr th {
     background: #1a150e;
 }
 
-/* --- CSS RIÊNG CHO QUÊN MẬT KHẨU --- */
+/* --- TRANG AUTH & FORM (Fix Ver 2.6) --- */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: auto !important;
+    padding: 0 !important;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 550px;
+    background: #111;
+    border-radius: 15px;
+    border: 1px solid #222;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.auth-form-box { padding: 20px 20px !important; }
+
+/* Placeholder & Input Color */
+.input-item input::placeholder { color: #555; opacity: 1; }
+.input-item input { 
+    width: 100%; padding: 12px 15px !important; background: #000; 
+    border: 1px solid #222; color: #fff; border-radius: 10px; 
+}
+
+/* Fix con mắt mật khẩu */
+.password-toggle-wrapper { position: relative; width: 100%; }
+.password-toggle-wrapper input { padding-right: 45px !important; }
+.toggle-password-icon { 
+    position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
+    color: #666; cursor: pointer; z-index: 10; font-size: 14px; 
+}
+
+/* Nút quên mật khẩu */
+.forgot-pass-link-wrapper { 
+    text-align: right; margin: 10px 0 20px; position: relative; z-index: 99; 
+}
+.forgot-pass-link-wrapper a { 
+    color: #888; font-size: 12px; text-decoration: none; padding: 5px; cursor: pointer; 
+}
+.forgot-pass-link-wrapper a:hover { color: #f39c12; }
+
+/* Ẩn các form phụ lúc khởi tạo */
+#forgot-form, #reg-form { display: none; }
+
+/* --- THU GỌN FORM ĐĂNG NHẬP / ĐĂNG KÝ --- */
+.auth-wrapper {
+    min-height: auto !important; /* Bỏ chiều cao tối thiểu quá lớn */
+    padding: 30px 0 !important; /* Giảm padding ngoài từ 60px xuống 30px */
+}
+
+.auth-form-box {
+    padding: 20px 30px !important; /* Giảm padding trong từ 35px xuống 20px */
+}
+
+.input-item {
+    margin-bottom: 12px !important; /* Giảm khoảng cách giữa các ô từ 20px xuống 12px */
+}
+
+.input-item label {
+    margin-bottom: 5px !important; /* Nhãn sát vào ô input hơn */
+}
+
 .forgot-pass-link-wrapper {
-    text-align: right;
-    margin: 5px 0 20px 0;
-    position: relative;
-    z-index: 999; /* Đảm bảo luôn bấm được */
+    margin: 5px 0 15px !important; /* Thu gọn vùng quên mật khẩu */
 }
 
-.forgot-pass-link-wrapper a {
-    color: #888;
-    font-size: 13px;
-    cursor: pointer !important;
-    padding: 5px;
-    display: inline-block;
-}
 
-.forgot-pass-link-wrapper a:hover {
-    color: #f39c12;
-}
+/* ============================================================
+   DANH CHO MOBILE & RESPONSIVE (VER 2.9 - CLEAN VERSION)
+   ============================================================ */
 
-/* Ép các form khác ẩn đi khi không dùng */
-#forgot-form, #reg-form {
+/* 1. Thiết lập mặc định (Desktop ẩn các nút mobile) */
+.mobile-toggle, 
+.mobile-search-bar, 
+.mobile-menu-header, 
+.mobile-nav-deposit {
     display: none;
+}
+
+@media (max-width: 992px) {
+    /* --- HEADER TOP: Sắp xếp lại logo và icon --- */
+    .main-header {
+        padding: 10px 0 !important;
+    }
+
+    .header-top {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 15px !important;
+    }
+
+    /* Ẩn các thành phần desktop rườm rà */
+    .header-search, .hide-mobile {
+        display: none !important;
+    }
+
+    /* Icon to (24px) giúp khách dễ bấm trên điện thoại */
+    .mobile-toggle {
+        display: block !important;
+        font-size: 24px !important;
+        color: #fff;
+        cursor: pointer;
+        order: 1; /* Nằm bên trái */
+    }
+
+    .logo {
+        order: 2; /* Logo nằm giữa */
+    }
+
+    .logo img {
+        height: 32px !important; /* Thu nhỏ logo cho cân đối */
+    }
+
+    .header-actions {
+        order: 3; /* User icon nằm bên phải */
+    }
+
+    /* --- O TIM KIEM MOBILE (Hien mac dinh) --- */
+    .mobile-search-bar {
+        display: block !important;
+        margin-top: 15px;
+        padding-bottom: 5px;
+    }
+
+    .search-inner-mobile {
+        display: flex;
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .search-inner-mobile input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #fff;
+        padding: 10px 15px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .search-inner-mobile button {
+        background: var(--color-accent);
+        border: none;
+        padding: 0 15px;
+        color: #000;
+        font-size: 16px;
+    }
+
+    /* --- MENU TRUOT (SIDEBAR MOBILE) --- */
+    .header-nav {
+        position: fixed;
+        top: 0;
+        left: -100%; /* Giấu menu */
+        width: 300px;
+        height: 100vh;
+        background: #0d0d0d;
+        z-index: 10000;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 25px;
+        box-shadow: 10px 0 40px rgba(0,0,0,0.8);
+        border-top: none;
+        margin-top: 0;
+    }
+
+    .header-nav.active {
+        left: 0; /* Truoc menu ra */
+    }
+
+    /* Dau menu: Tieu de + Nut X */
+    .mobile-menu-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #222;
+        margin-bottom: 20px;
+    }
+
+    .mobile-menu-header span {
+        font-weight: 800;
+        color: var(--color-accent);
+        font-size: 16px;
+    }
+
+    .mobile-menu-header i {
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    /* Nut Nap Tien trong Menu */
+    .mobile-nav-deposit {
+        display: block !important;
+        margin-bottom: 25px;
+    }
+
+    .btn-deposit-mobile {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--color-accent) !important;
+        color: #000 !important;
+        padding: 15px !important;
+        border-radius: 10px;
+        font-weight: 900;
+        text-decoration: none;
+        font-size: 15px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(255, 174, 0, 0.3);
+    }
+
+    /* Danh sach Menu doc */
+    .nav-list {
+        flex-direction: column !important;
+        gap: 5px !important;
+        padding: 0 !important;
+    }
+
+    .nav-list li {
+        width: 100%;
+        border-bottom: 1px solid #161616;
+    }
+
+    .nav-list a {
+        display: block !important;
+        padding: 15px 0 !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        color: #eee !important;
+        transition: 0.3s;
+    }
+
+    .nav-list a:hover {
+        color: var(--color-accent) !important;
+        padding-left: 5px !important;
+    }
+}
+
+/* --- TOI UU GRID SAN PHAM MOBILE (2 COT) --- */
+@media (max-width: 768px) {
+    /* Ép hiển thị 2 cột cho tất cả các lưới sản phẩm */
+    .dyat-grid, .dyat-product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important; /* Giảm khoảng cách giữa các card */
+        margin-top: 15px !important;
+    }
+
+    /* Điều chỉnh chiều cao khung ảnh cho cân đối với giao diện 2 cột */
+    .card-media, .card-thumb {
+        height: 130px !important;
+    }
+
+    /* Thu nhỏ font chữ tiêu đề và giá để không bị tràn dòng */
+    .card-name, .card-title {
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
+        white-space: normal !important; /* Cho phép xuống dòng nếu tên quá dài */
+    }
+
+    /* Tối ưu Meta Bits (Rank, Level...) để không bị quá khít */
+    .meta-bit {
+        font-size: 10px !important;
+    }
+
+    /* Thu nhỏ Ribbon giá để vừa vặn với chiều ngang mới */
+    .price-ribbon, .sale-ribbon {
+        width: 100% !important;
+        max-width: 120px;
+        font-size: 13px !important;
+        height: 22px !important;
+    }
+
+    /* Ẩn bớt các thông tin không cần thiết nếu khung vẫn bị chật */
+    .card-meta-bits {
+        gap: 4px !important;
+    }
+}
+
+/* --- FIX HITBOX CON MẮT MẬT KHẨU TRÊN MOBILE --- */
+@media (max-width: 992px) {
+    .toggle-password-icon {
+        font-size: 18px !important; /* Làm icon to hơn để dễ nhìn */
+        padding: 12px !important;  /* Mở rộng vùng click xung quanh icon */
+        right: 5px !important;     /* Căn chỉnh lại vị trí do đã thêm padding */
+        z-index: 100 !important;   /* Đảm bảo icon luôn nằm trên cùng, không bị ô input che khuất */
+        cursor: pointer !important;
+    }
+
+    /* Đảm bảo văn bản không bị đè bởi icon to hơn */
+    .password-toggle-wrapper input {
+        padding-right: 50px !important;
+    }
+}
+
+
+/* --- TỐI ƯU FORM AUTH: PADDING 10PX - MAX WIDTH INPUT --- */
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0 !important; 
+    /* Giữ 15px bên ngoài để Card không dính sát mép màn hình điện thoại */
+    padding: 0 15px !important; 
+    min-height: auto !important;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 500px !important;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 15px; /* Giảm bo góc một chút cho hợp với padding nhỏ */
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+/* Tab điều hướng: Padding ngang 10px để thẳng hàng tuyệt đối với Input */
+.auth-nav {
+    display: flex;
+    border-bottom: 1px solid #222;
+    padding: 0 10px !important; 
+}
+
+.auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 15px 0 !important;
+    color: #666;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+/* --- VÙNG CHỨA FORM VỚI PADDING 10PX --- */
+.auth-form-box {
+    padding: 20px 0px !important; /* Chỉ để 10px padding trái/phải */
+}
+
+.input-item {
+    margin-bottom: 12px !important; /* Thu hẹp khoảng cách các ô */
+}
+
+.input-item label {
+    font-size: 11px !important;
+    margin-bottom: 5px !important;
+    padding-left: 2px;
+}
+
+.input-item input {
+    width: 100% !important;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px 12px !important; /* Padding trong ô cũng thu gọn lại */
+    border-radius: 8px;
+    font-size: 16px !important; /* Giữ 16px để chống zoom trên iPhone */
+}
+
+.input-item input::placeholder {
+    font-size: 14px !important;
+    color: #444 !important;
+}
+
+/* Icon con mắt sát lề hơn do padding đã nhỏ */
+.toggle-password-icon {
+    right: 12px !important;
+    font-size: 16px !important;
+}
+
+.btn-auth {
+    width: 100% !important;
+    background: var(--color-accent) !important;
+    color: #000 !important;
+    padding: 14px !important;
+    border-radius: 8px;
+    font-weight: 900;
+    margin-top: 10px;
+    font-size: 15px;
+    text-transform: uppercase;
+}
+
+.auth-extra {
+    margin-top: 15px;
+    padding: 0 2px;
+}
+
+/* --- FIX CÂN BẰNG CHIỀU CAO TUYỆT ĐỐI (OTP) --- */
+
+.input-group-otp {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 15px;
+}
+
+.input-group-otp input,
+#btn-send-otp, 
+#btn-send-otp-forgot {
+    /* Ép chiều cao bằng nhau tuyệt đối cho cả 2 */
+    height: 45px !important; 
+    box-sizing: border-box !important; /* Đảm bảo padding/border không làm tăng chiều cao */
+    border-radius: 8px !important; /* Bo góc đều như ý bạn */
+}
+
+.input-group-otp input {
+    flex: 1 !important;
+    background: #000;
+    border: 1px solid #333 !important;
+    color: #fff;
+    padding: 0 15px !important; /* Chỉ padding ngang để không ảnh hưởng chiều dọc */
+    margin: 0 !important;
+}
+
+#btn-send-otp, 
+#btn-send-otp-forgot {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 20px !important;
+    background: var(--color-accent) !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    border: none !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+
+
+/* --- CSS TỔNG LỰC: ÉP HIỂN THỊ NỘI DUNG DASHBOARD MOBILE --- */
+@media (max-width: 992px) {
+    /* 1. Reset Container: Phá bỏ Flexbox Desktop */
+    .dashboard-wrapper, 
+    .dashboard-container {
+        display: block !important; /* Đưa về dạng khối dọc */
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 10px !important;
+        margin: 0 !important;
+        overflow: visible !important; /* Không cho phép ẩn nội dung tràn */
+    }
+
+    /* 2. Sidebar (Menu): Nằm trên */
+    .dashboard-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        float: none !important;
+        display: block !important;
+        margin: 0 0 20px 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* 3. QUAN TRỌNG: Ép Content hiện hình */
+    .dashboard-content {
+        display: block !important; /* Ép hiển thị */
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 400px !important; /* Tạo chiều cao ảo để dễ tìm thấy nội dung */
+        float: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        visibility: visible !important; /* Gỡ bỏ các lệnh ẩn từ theme */
+        opacity: 1 !important;
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+    }
+
+    /* 4. Sửa các khối Stats bên trong Content */
+    .dashboard-stats-grid, 
+    .stats-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin: 0 0 20px 0 !important;
+    }
+
+    .stat-card {
+        flex: 1 1 calc(50% - 10px) !important;
+        width: auto !important;
+        min-width: 140px !important;
+    }
+
+    /* 5. Ép mọi thẻ div con bên trong Content phải rộng 100% */
+    .dashboard-box, 
+    .order-status-box,
+    .dashboard-form-wrapper {
+        width: 100% !important;
+        display: block !important;
+        margin-bottom: 15px !important;
+    }
 }

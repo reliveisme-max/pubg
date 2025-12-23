@@ -130,27 +130,17 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'nicks';
                                 class="<?php echo ($current_page == $i) ? 'current' : ''; ?>"><?php echo $i; ?></a>
                         <?php endfor; ?>
                     </div>
-                <?php else: echo '<tr><td colspan="4" style="text-align:center; padding: 40px; color: #fff;">Chưa có lịch sử biến động.</td></tr>';
-                            endif; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 40px; color: #fff;">Chưa có lịch sử biến động.
+                        </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                <?php endif; ?>
             <?php endif; ?>
             </div>
         </main>
     </div>
 </div>
-<script>
-    function copyV(id) {
-        var text = document.getElementById(id).innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Đã copy!',
-                text: text,
-                timer: 1000,
-                showConfirmButton: false,
-                background: '#111',
-                color: '#fff'
-            });
-        });
-    }
-</script>
 <?php get_footer(); ?>

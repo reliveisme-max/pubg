@@ -1,9 +1,12 @@
 <?php
 /* Template Name: Auth Page */
-if (is_user_logged_in()) { wp_redirect(home_url('/tai-khoan/')); exit; }
+if (is_user_logged_in()) {
+    wp_redirect(home_url('/tai-khoan/'));
+    exit;
+}
 get_header(); ?>
 
-<div class="container auth-wrapper" style="margin-top: 60px; margin-bottom: 80px;">
+<div class="container auth-wrapper" style="margin-top: 30px; margin-bottom: 30px;">
     <div class="auth-card">
         <div class="auth-nav">
             <div class="auth-tab active" data-target="login-form">ĐĂNG NHẬP</div>

@@ -1,238 +1,209 @@
 jQuery(document).ready(function($) {
+
     /**
-     * 1. XỬ LÝ GIAO DIỆN AUTH (ĐĂNG NHẬP / ĐĂNG KÝ)
+     * ==========================================
+     * 1. HỆ THỐNG ĐĂNG NHẬP / ĐĂNG KÝ / QUÊN MK
+     * ==========================================
      */
+
+    // --- Chuyển Tab Đăng nhập / Đăng ký ---
     $('.auth-tab').on('click', function() {
+        var target = $(this).data('target');
         $('.auth-tab').removeClass('active');
         $(this).addClass('active');
+        
         $('.auth-form-box').hide();
-        $('#' + $(this).data('target')).fadeIn();
+        $('#' + target).stop().fadeIn();
+    });
+
+    // --- Hiện Form Quên mật khẩu ---
+    $(document).on('click', '#show-forgot-form', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.auth-form-box').hide();
+        $('.auth-tab').removeClass('active');
+        $('#forgot-form').stop().fadeIn();
+    });
+
+    // --- Quay lại Đăng nhập từ Quên mật khẩu ---
+    $(document).on('click', '.back-to-login', function(e) {
+        e.preventDefault();
+        $('#forgot-form').hide();
+        $('#login-form').stop().fadeIn();
+        $('.auth-tab[data-target="login-form"]').addClass('active');
+    });
+
+    // --- Ẩn / Hiện mật khẩu (Icon con mắt) ---
+    $(document).on('click', '.toggle-password-icon', function() {
+        var input = $(this).siblings('input');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+        }
     });
 
     /**
-     * 2. XỬ LÝ GỬI MÃ OTP QUA EMAIL
+     * --- Gửi OTP (Dùng chung cho Đăng ký & Quên MK) ---
      */
-    $('#btn-send-otp').on('click', function() {
-        var email = $('#reg_email').val();
+    function sendOTP(email, btn, actionType) {
         if(!email) { 
-            Swal.fire({ icon: 'error', title: 'LỖI', text: 'Vui lòng nhập Email trước!', background: '#111', color: '#fff' });
+            Swal.fire({ icon: 'error', text: 'Vui lòng nhập email!', background: '#111', color: '#fff' });
             return; 
         }
         
-        var btn = $(this);
         btn.prop('disabled', true).text('ĐANG GỬI...');
         
-        $.post(shop_ajax.url, { action: 'send_otp_action', email: email }, function(res) {
+        $.post(shop_ajax.url, { action: actionType, email: email }, function(res) {
             if(res.success) {
-                Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' });
+                Swal.fire({ icon: 'success', text: res.data, background: '#111', color: '#fff' });
                 var sec = 60;
                 var timer = setInterval(function() {
                     sec--; btn.text('GỬI LẠI ('+sec+'s)');
                     if(sec <= 0) { clearInterval(timer); btn.prop('disabled', false).text('GỬI MÃ'); }
                 }, 1000);
             } else { 
-                Swal.fire({ icon: 'error', title: 'THẤT BẠI', text: res.data, background: '#111', color: '#fff' });
+                Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
                 btn.prop('disabled', false).text('GỬI MÃ'); 
             }
         });
+    }
+
+    // Nút gửi OTP Đăng ký
+    $('#btn-send-otp').on('click', function() {
+        sendOTP($('#reg_email').val(), $(this), 'send_otp_action');
+    });
+
+    // Nút gửi OTP Quên mật khẩu
+    $('#btn-send-otp-forgot').on('click', function() {
+        sendOTP($('#forgot_email').val(), $(this), 'forgot_pass_otp_action');
     });
 
     /**
-     * 3. XỬ LÝ ĐĂNG NHẬP & ĐĂNG KÝ (AJAX)
+     * --- Submit các Form Auth ---
      */
-    $('#login-form, #reg-form').on('submit', function(e) {
+    $('#login-form, #reg-form, #forgot-form').on('submit', function(e) {
         e.preventDefault();
         var form = $(this);
-        var btn = form.find('button');
-        var auth_type = (form.attr('id') == 'login-form' ? 'login' : 'register');
-        var data = form.serialize() + '&action=custom_auth_action&auth_type=' + auth_type;
+        var btn = form.find('button[type="submit"]');
+        var data = form.serialize();
+        var action = 'custom_auth_action';
 
+        if (form.attr('id') === 'forgot-form') {
+            action = 'reset_password_action';
+        } else {
+            var auth_type = (form.attr('id') == 'login-form' ? 'login' : 'register');
+            data += '&auth_type=' + auth_type;
+        }
+        
+        data += '&action=' + action;
         btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ...');
 
         $.post(shop_ajax.url, data, function(res) {
             if (res.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: auth_type === 'login' ? 'ĐĂNG NHẬP THÀNH CÔNG!' : 'ĐĂNG KÝ THÀNH CÔNG!',
-                    text: res.data,
-                    background: '#111', color: '#fff', confirmButtonText: 'TIẾP TỤC'
-                }).then(() => {
-                    // Chuyển hướng chính xác về trang Dashboard tự tạo
-                    window.location.href = shop_ajax.home_url + '/tai-khoan/'; 
+                Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' }).then(() => {
+                    if (action === 'reset_password_action') location.reload();
+                    else window.location.href = shop_ajax.home_url + '/tai-khoan/';
                 });
             } else {
                 Swal.fire({ icon: 'error', title: 'THẤT BẠI', text: res.data, background: '#111', color: '#fff' });
-                btn.prop('disabled', false).html(auth_type === 'login' ? 'ĐĂNG NHẬP NGAY <i class="fa-solid fa-right-to-bracket"></i>' : 'TẠO TÀI KHOẢN <i class="fa-solid fa-user-plus"></i>');
+                btn.prop('disabled', false).html('THỰC HIỆN LẠI');
             }
         });
     });
 
+
     /**
-     * 4. XỬ LÝ MUA NICK (CẬP NHẬT REAL-TIME KHÔNG F5)
+     * ==========================================
+     * 2. HỆ THỐNG CŨ (MUA NICK / COPY / NẠP TIỀN)
+     * ==========================================
      */
+
+    // --- Mua Nick ---
     $('#btn-buy-now').on('click', function(e) {
         e.preventDefault();
-        var nick_id = $(this).data('id');
+        var post_id = $(this).data('id');
+        var price = $(this).data('price');
 
         Swal.fire({
-            title: 'Xác nhận mua?',
-            text: "Số dư của bạn sẽ bị trừ ngay lập tức!",
+            title: 'XÁC NHẬN MUA NICK',
+            text: "Bạn có chắc chắn muốn mua nick này với giá " + price.toLocaleString() + "đ?",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ffae00',
-            confirmButtonText: 'MUA NGAY',
+            confirmButtonColor: '#f39c12',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ĐỒNG Ý MUA',
             cancelButtonText: 'HỦY',
-            background: '#111', color: '#fff'
+            background: '#111',
+            color: '#fff'
         }).then((result) => {
             if (result.isConfirmed) {
-                var $btn = $(this);
-                $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>...');
-
-                $.post(shop_ajax.url, { action: 'buy_nick_action', nick_id: nick_id }, function(res) {
+                $.post(shop_ajax.url, { action: 'buy_nick_action', post_id: post_id }, function(res) {
                     if (res.success) {
-                        // 1. Cập nhật số dư trên Header và Dashboard
-                        $('.user-balance-nav').html('<i class="fa-solid fa-wallet"></i> ' + res.data.new_balance);
-                        $('.user-balance-box, .stat-card strong').first().text(res.data.new_balance);
-
-                        // 2. Hiển thị thông tin Nick vào Modal
-                        $('#res-user').text(res.data.account);
-                        $('#res-pass').text(res.data.password);
-                        $('#purchase-modal').fadeIn().css('display', 'flex');
-                        
-                        // 3. Ẩn nút mua để khách không bấm lại được nữa
-                        $btn.remove(); 
+                        Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' })
+                        .then(() => { window.location.href = shop_ajax.home_url + '/lich-su-mua-hang/'; });
                     } else {
                         Swal.fire({ icon: 'error', title: 'LỖI', text: res.data, background: '#111', color: '#fff' });
-                        $btn.prop('disabled', false).text('XÁC NHẬN MUA NGAY');
                     }
                 });
             }
         });
     });
 
-    /**
-     * 5. XỬ LÝ NÚT ĐÓNG MODAL (DÙNG DELEGATION ĐỂ FIX LỖI)
-     */
-    $(document).on('click', '.btn-close-modal', function() {
-        $('#purchase-modal').fadeOut(function() {
-            $(this).css('display', 'none');
-        });
-    });
-
-    /**
-     * 5. XỬ LÝ ĐỔI MẬT KHẨU TẠI DASHBOARD
-     */
-    $(document).on('submit', '#change-pass-form', function(e) {
-        e.preventDefault();
-        var btn = $(this).find('button');
-        var new_pass = $(this).find('input[name="new_password"]').val();
-
-        btn.prop('disabled', true).text('ĐANG CẬP NHẬT...');
-
-        $.post(shop_ajax.url, { action: 'change_password_action', new_password: new_pass }, function(res) {
-            if (res.success) {
-                Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' });
-            } else {
-                Swal.fire({ icon: 'error', title: 'LỖI', text: res.data, background: '#111', color: '#fff' });
-            }
-            btn.prop('disabled', false).text('CẬP NHẬT NGAY');
-        });
-    });
-
-    /**
-     * 6. TÍNH NĂNG COPY NHANH (CHO LỊCH SỬ MUA HÀNG)
-     */
-    $(document).on('click', '.btn-copy-mini', function() {
-        var targetId = $(this).data('copy');
-        var textToCopy = $('#' + targetId).text();
-        
-        var temp = $("<input>");
-        $("body").append(temp);
-        temp.val(textToCopy).select();
-        document.execCommand("copy");
-        temp.remove();
-
-        var icon = $(this).find('i');
-        icon.removeClass('fa-copy').addClass('fa-check');
-        setTimeout(function() {
-            icon.removeClass('fa-check').addClass('fa-copy');
-        }, 1500);
-    });
-});
-
-/**
- * XỬ LÝ ẨN/HIỆN MẬT KHẨU
- */
-$(document).on('click', '.toggle-password-icon', function() {
-    var input = $(this).siblings('input');
-    if (input.attr('type') === 'password') {
-        input.attr('type', 'text');
-        $(this).removeClass('fa-eye').addClass('fa-eye-slash');
-    } else {
-        input.attr('type', 'password');
-        $(this).removeClass('fa-eye-slash').addClass('fa-eye');
-    }
-});
-
-/* --- JS RIÊNG CHO QUÊN MẬT KHẨU --- */
-
-// 1. Click hiện form quên mật khẩu
-$(document).on('click', '#show-forgot-form', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    $('.auth-form-box').hide(); // Ẩn Login/Register
-    $('.auth-tab').removeClass('active');
-    $('#forgot-form').stop().fadeIn(); // Hiện Quên mật khẩu
-});
-
-// 2. Quay lại đăng nhập
-$(document).on('click', '.back-to-login', function(e) {
-    e.preventDefault();
-    $('#forgot-form').hide();
-    $('#login-form').fadeIn();
-    $('.auth-tab[data-target="login-form"]').addClass('active');
-});
-
-// 3. Gửi mã OTP Quên mật khẩu
-$('#btn-send-otp-forgot').on('click', function() {
-    var email = $('#forgot_email').val();
-    if(!email) { 
-        Swal.fire({ icon: 'error', text: 'Nhập email của bạn!', background: '#111', color: '#fff' });
-        return; 
-    }
-    var btn = $(this);
-    btn.prop('disabled', true).text('ĐANG GỬI...');
-    
-    $.post(shop_ajax.url, { action: 'forgot_pass_otp_action', email: email }, function(res) {
-        if(res.success) {
-            Swal.fire({ icon: 'success', text: res.data, background: '#111', color: '#fff' });
-            var sec = 60;
-            var timer = setInterval(function() {
-                sec--; btn.text('GỬI LẠI ('+sec+'s)');
-                if(sec <= 0) { clearInterval(timer); btn.prop('disabled', false).text('GỬI MÃ'); }
-            }, 1000);
-        } else { 
-            Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
-            btn.prop('disabled', false).text('GỬI MÃ'); 
-        }
-    });
-});
-
-// 4. Submit đặt lại mật khẩu mới
-$('#forgot-form').on('submit', function(e) {
-    e.preventDefault();
-    var data = $(this).serialize() + '&action=reset_password_action';
-    var btn = $(this).find('button[type="submit"]');
-    btn.prop('disabled', true).text('ĐANG CẬP NHẬT...');
-
-    $.post(shop_ajax.url, data, function(res) {
-        if (res.success) {
-            Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' }).then(() => {
-                location.reload(); 
+    // --- Copy Tài khoản / Mật khẩu ---
+    window.copyV = function(id) {
+        var text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'ĐÃ COPY',
+                text: text,
+                timer: 1000,
+                showConfirmButton: false,
+                background: '#111',
+                color: '#fff'
             });
-        } else {
-            Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
-            btn.prop('disabled', false).text('XÁC NHẬN ĐỔI MẬT KHẨU');
+        });
+    }
+
+    // --- Đổi mật khẩu trong Dashboard ---
+    $('#change-pass-form').on('submit', function(e) {
+        e.preventDefault();
+        var data = $(this).serialize() + '&action=change_password_action';
+        $.post(shop_ajax.url, data, function(res) {
+            if (res.success) {
+                Swal.fire({ icon: 'success', text: res.data, background: '#111', color: '#fff' });
+                $('#change-pass-form')[0].reset();
+            } else {
+                Swal.fire({ icon: 'error', text: res.data, background: '#111', color: '#fff' });
+            }
+        });
+    });
+
+});
+
+
+jQuery(document).ready(function($) {
+    // --- 1. MỞ/ĐÓNG MENU MOBILE ---
+    $('#open-menu').on('click', function() {
+        $('#mobile-menu').addClass('active');
+        $('body').css('overflow', 'hidden'); 
+    });
+
+    $('#close-menu').on('click', function() {
+        $('#mobile-menu').removeClass('active');
+        $('body').css('overflow', 'auto');
+    });
+
+    // Đóng menu khi bấm ra ngoài vùng menu
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#mobile-menu, #open-menu').length) {
+            $('#mobile-menu').removeClass('active');
+            $('body').css('overflow', 'auto');
         }
     });
+
+    // --- (GIỮ NGUYÊN CÁC LOGIC AUTH, MUA HÀNG, NẠP TIỀN PHÍA DƯỚI) ---
 });
