@@ -68,7 +68,7 @@ jQuery(document).ready(function($) {
     });
 
     /**
-     * 4. XỬ LÝ MUA NICK (POPUP XÁC NHẬN & TRỪ TIỀN)
+     * 4. XỬ LÝ MUA NICK (CẬP NHẬT REAL-TIME KHÔNG F5)
      */
     $('#btn-buy-now').on('click', function(e) {
         e.preventDefault();
@@ -76,33 +76,47 @@ jQuery(document).ready(function($) {
 
         Swal.fire({
             title: 'Xác nhận mua?',
-            text: "Số dư của bạn sẽ bị trừ vào tài khoản ngay lập tức!",
+            text: "Số dư của bạn sẽ bị trừ ngay lập tức!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ffae00',
-            cancelButtonColor: '#333',
             confirmButtonText: 'MUA NGAY',
             cancelButtonText: 'HỦY',
             background: '#111', color: '#fff'
         }).then((result) => {
             if (result.isConfirmed) {
+                var $btn = $(this);
+                $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>...');
+
                 $.post(shop_ajax.url, { action: 'buy_nick_action', nick_id: nick_id }, function(res) {
                     if (res.success) {
-                        // Hiển thị thông tin vào Modal
+                        // 1. Cập nhật số dư trên Header và Dashboard
+                        $('.user-balance-nav').html('<i class="fa-solid fa-wallet"></i> ' + res.data.new_balance);
+                        $('.user-balance-box, .stat-card strong').first().text(res.data.new_balance);
+
+                        // 2. Hiển thị thông tin Nick vào Modal
                         $('#res-user').text(res.data.account);
                         $('#res-pass').text(res.data.password);
-                        $('#purchase-modal').css('display', 'flex').hide().fadeIn();
+                        $('#purchase-modal').fadeIn().css('display', 'flex');
+                        
+                        // 3. Ẩn nút mua để khách không bấm lại được nữa
+                        $btn.remove(); 
                     } else {
-                        Swal.fire({ icon: 'error', title: 'LỖI THANH TOÁN', text: res.data, background: '#111', color: '#fff' });
+                        Swal.fire({ icon: 'error', title: 'LỖI', text: res.data, background: '#111', color: '#fff' });
+                        $btn.prop('disabled', false).text('XÁC NHẬN MUA NGAY');
                     }
                 });
             }
         });
     });
 
-    // Đóng Popup kết quả mua hàng
-    $('.btn-close-modal').on('click', function() {
-        $('#purchase-modal').fadeOut();
+    /**
+     * 5. XỬ LÝ NÚT ĐÓNG MODAL (DÙNG DELEGATION ĐỂ FIX LỖI)
+     */
+    $(document).on('click', '.btn-close-modal', function() {
+        $('#purchase-modal').fadeOut(function() {
+            $(this).css('display', 'none');
+        });
     });
 
     /**

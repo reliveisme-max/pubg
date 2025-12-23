@@ -848,3 +848,59 @@ body {
         margin-top: 20px !important;
     }
 }
+
+
+/* Nhãn Đã Bán đè lên ảnh */
+.card-media { position: relative; }
+.sold-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(192, 57, 43, 0.9);
+    color: #fff;
+    padding: 8px 25px;
+    font-weight: 900;
+    font-size: 14px;
+    border: 2px solid #fff;
+    z-index: 20;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+.dyat-card.is-sold-acc { filter: grayscale(0.8); opacity: 0.7; }
+
+
+/* Container ảnh phải có position relative để căn giữa logo */
+.card-thumb {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Kiểu dáng logo tròn "Đã bán" */
+.sold-badge-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg); /* Hơi nghiêng cho chuyên nghiệp */
+    width: 80px;
+    height: 80px;
+    background: rgba(192, 57, 43, 0.9); /* Màu đỏ đậm trong suốt */
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 13px;
+    border: 3px double #fff; /* Viền kép trắng cho giống con dấu */
+    z-index: 10;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    pointer-events: none; /* Không cản trở việc click vào link ảnh */
+}
+
+/* Hiệu ứng làm mờ và đen trắng cho Nick đã bán */
+.product-card.is-sold-acc {
+    opacity: 0.7;
+    filter: grayscale(0.8);
+}

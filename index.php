@@ -63,6 +63,7 @@
                     <div class="dyat-grid">
                         <?php if ($sec_products): ?>
                             <?php foreach ($sec_products as $post): setup_postdata($post);
+                                if (get_field('is_sold', $post->ID) === 'yes') continue;
                                 $price_origin = (int)get_field('gia_ban');
                                 $price_sale   = (int)get_field('gia_sale'); ?>
                                 <div class="dyat-card">

@@ -48,15 +48,23 @@
     </div>
 
     <div class="dyat-product-grid">
-        <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-                <div class="product-card">
+        <?php if (have_posts()) : while (have_posts()) : the_post();
+                // Kiểm tra trạng thái đã bán để hiển thị logo
+                $is_sold_acc = (get_field('is_sold') === 'yes' || get_field('is_sold') === 'Đã bán');
+        ?>
+                <div class="product-card <?php echo $is_sold_acc ? 'is-sold-acc' : ''; ?>">
                     <div class="card-thumb">
                         <a href="<?php the_permalink(); ?>">
                             <?php if (has_post_thumbnail()) : the_post_thumbnail('medium');
                             else : ?>
                                 <img src="https://via.placeholder.com/300x180" alt="No image">
                             <?php endif; ?>
+
                             <div class="card-ms">MS: #<?php the_ID(); ?></div>
+
+                            <?php if ($is_sold_acc) : ?>
+                                <div class="sold-badge-circle">ĐÃ BÁN</div>
+                            <?php endif; ?>
                         </a>
                     </div>
 
@@ -79,10 +87,15 @@
                             $sale = (int)get_field('gia_sale');
                             ?>
                             <div class="price-box">
-                                <span class="old-price"><?php echo number_format($origin); ?>đ</span>
-                                <div class="sale-ribbon"><?php echo number_format($sale); ?>đ</div>
+                                <?php if ($sale > 0) : ?>
+                                    <span class="old-price"><?php echo number_format($origin); ?>đ</span>
+                                    <div class="sale-ribbon"><?php echo number_format($sale); ?>đ</div>
+                                <?php else : ?>
+                                    <div class="sale-ribbon"><?php echo number_format($origin); ?>đ</div>
+                                <?php endif; ?>
                             </div>
-                            <a href="<?php the_permalink(); ?>" class="btn-detail">CHI TIẾT</a>
+                            <a href="<?php the_permalink(); ?>"
+                                class="btn-detail"><?php echo $is_sold_acc ? 'XEM LẠI' : 'CHI TIẾT'; ?></a>
                         </div>
                     </div>
                 </div>
@@ -94,7 +107,7 @@
             echo paginate_links(array(
                 'prev_text' => '<i class="fa-solid fa-chevron-left"></i>',
                 'next_text' => '<i class="fa-solid fa-chevron-right"></i>',
-                'type'      => 'list', // Chuyển về dạng danh sách <ul> <li> để dễ CSS
+                'type'      => 'list',
             ));
         ?>
     </div>

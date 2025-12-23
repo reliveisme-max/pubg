@@ -116,34 +116,73 @@ function handle_custom_auth()
     }
 }
 
-// 5. LOGIC MUA HÀNG & TRỪ TIỀN
+// 5. LOGIC MUA HÀNG, TRỪ TIỀN & GHI LỊCH SỬ GIAO DỊCH (BẢN FULL)
 add_action('wp_ajax_buy_nick_action', 'handle_buy_nick_logic');
 function handle_buy_nick_logic()
 {
+    // Kiểm tra đăng nhập
     if (!is_user_logged_in()) {
-        wp_send_json_error('Vui lòng đăng nhập!');
+        wp_send_json_error('Vui lòng đăng nhập để mua hàng!');
     }
+
     $nick_id = intval($_POST['nick_id']);
     $user_id = get_current_user_id();
 
+    // 1. Kiểm tra trạng thái bán
     if (get_field('is_sold', $nick_id) == 'yes' || get_field('is_sold', $nick_id) == 'Đã bán') {
         wp_send_json_error('Nick này đã bán!');
     }
 
-    $price = (int)get_field('gia_sale', $nick_id);
-    $balance = (int)get_user_meta($user_id, 'user_balance', true); // Sử dụng user_balance không gạch dưới
+    // 2. Tính toán giá (Ưu tiên giá sale)
+    $price_origin = (int)get_field('gia_ban', $nick_id);
+    $price_sale   = (int)get_field('gia_sale', $nick_id);
+    $final_price  = ($price_sale > 0) ? $price_sale : $price_origin;
 
-    if ($balance < $price) {
-        wp_send_json_error('Số dư không đủ. Vui lòng nạp tiền!');
+    // 3. Kiểm tra số dư
+    $balance = (int)get_field('user_balance', 'user_' . $user_id);
+
+    if ($balance < $final_price) {
+        wp_send_json_error('Số dư không đủ. Vui lòng nạp thêm tiền!');
     }
 
-    update_user_meta($user_id, 'user_balance', $balance - $price);
+    $new_balance = $balance - $final_price;
+
+    // 4. Cập nhật Database
+    // Cập nhật số dư User và trạng thái Nick
+    update_field('user_balance', $new_balance, 'user_' . $user_id);
     update_field('is_sold', 'yes', $nick_id);
     update_post_meta($nick_id, 'buyer_id', $user_id);
 
-    wp_send_json_success(['account' => get_field('tai_khoan', $nick_id), 'password' => get_field('mat_khau', $nick_id)]);
+    // 5. GHI LỊCH SỬ GIAO DỊCH VÀO ACF USER
+    date_default_timezone_set('Asia/Ho_Chi_Minh');
+    $history_row = array(
+        'ngay'       => date('H:i - d/m/Y'),
+        'loai'       => 'Trừ tiền',
+        'so_tien'    => '-' . number_format($final_price) . 'đ',
+        'noi_dung'   => 'Mua Nick #' . $nick_id,
+        'so_du_cuoi' => number_format($new_balance) . 'đ'
+    );
+    // Sử dụng add_row của ACF để thêm vào repeater 'lich_su_giao_dich'
+    add_row('lich_su_giao_dich', $history_row, 'user_' . $user_id);
+
+    // 6. TRẢ VỀ DỮ LIỆU THÀNH CÔNG (BAO GỒM SỐ DƯ MỚI)
+    wp_send_json_success([
+        'account'     => get_field('tai_khoan', $nick_id),
+        'password'    => get_field('mat_khau', $nick_id),
+        'new_balance' => number_format($new_balance) . 'đ'
+    ]);
+
+    wp_die();
 }
 
+// 6. TỰ ĐỘNG ẨN NICK ĐÃ BÁN Ở CÁC TRANG DANH MỤC
+add_action('pre_get_posts', function ($query) {
+    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('nick-pubg') || is_tax())) {
+        $query->set('meta_query', array(
+            array('key' => 'is_sold', 'value' => 'yes', 'compare' => '!=')
+        ));
+    }
+});
 // 6. SHORTCODE HIỂN THỊ SỐ DƯ (ĐÃ FIX LỖI PHP 8)
 function get_user_balance_shortcode()
 {
@@ -388,3 +427,18 @@ function shoptule_admin_wallet_js()
     </script>
 <?php
 }
+
+
+// Tự động ẩn Nick đã bán khỏi các trang danh sách
+add_action('pre_get_posts', function ($query) {
+    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('nick-pubg') || is_tax())) {
+        $meta_query = array(
+            array(
+                'key'     => 'is_sold',
+                'value'   => 'yes',
+                'compare' => '!='
+            )
+        );
+        $query->set('meta_query', $meta_query);
+    }
+});
