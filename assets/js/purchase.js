@@ -207,3 +207,14 @@ jQuery(document).ready(function($) {
 
     // --- (GIỮ NGUYÊN CÁC LOGIC AUTH, MUA HÀNG, NẠP TIỀN PHÍA DƯỚI) ---
 });
+
+
+jQuery(document).ready(function($) {
+    // Toggle bộ lọc trên Mobile
+    $('#btn-toggle-filter').on('click', function() {
+        $('.shop-filter-wrapper').toggleClass('active');
+        
+        // Xoay mũi tên khi đóng/mở
+        $(this).find('.arrow-icon').toggleClass('fa-chevron-down fa-chevron-up');
+    });
+});

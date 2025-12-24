@@ -47,9 +47,10 @@ $balance = (int)get_field('user_balance', 'user_' . $user_id);
                     <div style="margin-bottom: 20px;"><label
                             style="display:block;color:#555;font-size:12px;font-weight:bold;margin-bottom:8px;">MẬT KHẨU
                             MỚI</label><input type="password" name="new_password"
+                            placeholder="Nhập mật khẩu mới của bạn..."
                             style="width:100%;background:#000;border:1px solid #222;padding:12px;color:#fff;border-radius:6px;"
-                            required></div>
-                    <button type="submit" class="btn-auth">CẬP NHẬT NGAY</button>
+                            required>
+                        <button type="submit" class="btn-auth">CẬP NHẬT NGAY</button>
                 </form>
             </div>
         </main>

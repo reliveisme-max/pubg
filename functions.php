@@ -426,18 +426,18 @@ add_action('pre_get_posts', function ($query) {
     if (!is_admin() && $query->is_main_query() && is_post_type_archive('nick-pubg')) {
         $meta_query = array('relation' => 'AND');
 
-        // Lọc Rank
+        // 1. Lọc Rank (Meta key: rank_pubg)
         if (!empty($_GET['filter_rank'])) {
             $meta_query[] = array('key' => 'rank_pubg', 'value' => sanitize_text_field($_GET['filter_rank']), 'compare' => '=');
         }
 
-        // Lọc Giá
+        // 2. Lọc Giá (Meta key: gia_ban)
         if (!empty($_GET['filter_price'])) {
             $range = explode('-', $_GET['filter_price']);
             $meta_query[] = array('key' => 'gia_ban', 'value' => array($range[0], $range[1]), 'type' => 'numeric', 'compare' => 'BETWEEN');
         }
 
-        // Lọc Súng nâng cấp
+        // 3. Lọc Súng nâng cấp (Kiểm tra field sung_nang_cap không trống)
         if (!empty($_GET['filter_gun'])) {
             if ($_GET['filter_gun'] == 'yes') {
                 $meta_query[] = array('key' => 'sung_nang_cap', 'value' => '', 'compare' => '!=');
@@ -446,18 +446,17 @@ add_action('pre_get_posts', function ($query) {
             }
         }
 
-        // Lọc Server
+        // 4. Lọc Server (Meta key: server_pubg)
         if (!empty($_GET['filter_server'])) {
             $meta_query[] = array('key' => 'server_pubg', 'value' => sanitize_text_field($_GET['filter_server']), 'compare' => '=');
         }
 
-        // Sắp xếp: Chưa bán lên trước, Mới đăng lên đầu
-        $query->set('meta_key', 'is_sold');
-        $query->set('orderby', array('meta_value' => 'ASC', 'date' => 'DESC'));
+        // SẮP XẾP: Mới đăng lên đầu
+        $query->set('orderby', 'date');
+        $query->set('order', 'DESC');
         $query->set('meta_query', $meta_query);
     }
 });
-
 
 /**
  * SECTION: CẤU HÌNH VN PAY (KEY RIÊNG CỦA BẠN)

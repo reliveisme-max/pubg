@@ -1521,68 +1521,396 @@ table thead tr th {
 
 
 
-/* --- CSS TỔNG LỰC: ÉP HIỂN THỊ NỘI DUNG DASHBOARD MOBILE --- */
-@media (max-width: 992px) {
-    /* 1. Reset Container: Phá bỏ Flexbox Desktop */
-    .dashboard-wrapper, 
-    .dashboard-container {
-        display: block !important; /* Đưa về dạng khối dọc */
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 10px !important;
-        margin: 0 !important;
-        overflow: visible !important; /* Không cho phép ẩn nội dung tràn */
+/* --- TỐI ƯU TRANG CHI TIẾT SẢN PHẨM MOBILE --- */
+@media (max-width: 768px) {
+    /* 1. Tối ưu Slider ảnh: Không để quá cao làm chiếm hết màn hình */
+    .single-product-slider {
+        height: 250px !important;
+        margin-bottom: 15px !important;
     }
 
-    /* 2. Sidebar (Menu): Nằm trên */
+    /* 2. Lưới thông số (Rank, Level, Súng...): Chia 2 cột gọn gàng */
+    .product-info-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 10px !important;
+        background: #111 !important;
+        border-radius: 12px !important;
+    }
+
+    .info-item {
+        background: #1a1a1a !important;
+        padding: 12px 10px !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .info-item i {
+        font-size: 18px !important;
+        margin-bottom: 5px !important;
+        color: var(--color-accent) !important;
+    }
+
+    .info-item span {
+        font-size: 11px !important;
+        color: #888 !important;
+    }
+
+    .info-item strong {
+        font-size: 13px !important;
+        color: #fff !important;
+    }
+
+    /* 3. Giá tiền và Nút Mua hàng */
+    .product-action-box {
+        position: sticky !important; /* Ghim nút mua hàng ở dưới cùng màn hình nếu cần */
+        bottom: 0;
+        background: #000 !important;
+        padding: 15px !important;
+        border-top: 1px solid #222 !important;
+        z-index: 100;
+    }
+
+    .price-big {
+        font-size: 24px !important;
+        margin-bottom: 10px !important;
+        text-align: center !important;
+    }
+
+    .btn-buy-now {
+        width: 100% !important;
+        padding: 15px !important;
+        font-size: 18px !important;
+        font-weight: 900 !important;
+        border-radius: 10px !important;
+        text-transform: uppercase !important;
+    }
+}
+
+
+
+
+/* ============================================================
+   DANH CHO MOBILE & RESPONSIVE DASHBOARD (BẢN FULL HOÀN THIỆN)
+   ============================================================ */
+
+@media (max-width: 992px) {
+    /* 1. LAYOUT CHUNG: Ép về 1 cột dọc, chống bóp nghẹt nội dung */
+    .dashboard-layout {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 10px !important;
+    }
+
+    /* 2. SIDEBAR & PROFILE: Thu nhỏ avatar và làm gọn thông tin */
     .dashboard-sidebar {
         width: 100% !important;
-        max-width: 100% !important;
+        margin-bottom: 15px !important;
         float: none !important;
+    }
+
+    .user-profile-card {
+        padding: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        background: #111 !important;
+        border-radius: 12px !important;
+        text-align: left !important;
+    }
+
+    .user-avatar-circle {
+        margin: 0 !important;
+        width: 40px !important; 
+        height: 40px !important;
+        font-size: 16px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .user-profile-card h3 {
+        font-size: 13px !important; /* Chữ nhỏ bớt thô */
+        margin: 0 !important;
+        font-weight: 700 !important;
+    }
+
+    .user-balance-box {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        height: auto !important;
+        border-radius: 6px !important;
+    }
+
+    /* 3. MENU TRƯỢT NGANG (HORIZONTAL SCROLL) */
+    .dashboard-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important; 
+        gap: 8px !important;
+        padding: 5px 2px 15px 2px !important;
+        scrollbar-width: none;
+        margin-bottom: 20px !important;
+    }
+    .dashboard-menu::-webkit-scrollbar { display: none; }
+
+    .dashboard-menu li {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+    }
+
+    .dashboard-menu a {
+        padding: 8px 14px !important;
+        font-size: 11px !important; 
+        border-radius: 20px !important;
+        white-space: nowrap !important;
+        font-weight: 600 !important;
+    }
+
+    /* 4. CONTENT: Hiển thị ngay dưới Menu */
+    .dashboard-layout main, 
+    .dashboard-content {
         display: block !important;
-        margin: 0 0 20px 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important; 
+        margin: 0 !important;
+        padding: 0 !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
 
-    /* 3. QUAN TRỌNG: Ép Content hiện hình */
-    .dashboard-content {
-        display: block !important; /* Ép hiển thị */
-        width: 100% !important;
-        max-width: 100% !important;
-        min-height: 400px !important; /* Tạo chiều cao ảo để dễ tìm thấy nội dung */
-        float: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        visibility: visible !important; /* Gỡ bỏ các lệnh ẩn từ theme */
-        opacity: 1 !important;
-        position: relative !important;
-        left: 0 !important;
-        top: 0 !important;
-    }
-
-    /* 4. Sửa các khối Stats bên trong Content */
-    .dashboard-stats-grid, 
-    .stats-row {
-        display: flex !important;
-        flex-wrap: wrap !important;
+    /* 5. THỐNG KÊ (STATS): Grid 2 cột đều nhau */
+    .dash-stats, .dashboard-stats-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 10px !important;
-        width: 100% !important;
-        margin: 0 0 20px 0 !important;
+        margin-bottom: 15px !important;
     }
 
     .stat-card {
-        flex: 1 1 calc(50% - 10px) !important;
-        width: auto !important;
-        min-width: 140px !important;
+        padding: 12px !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
     }
 
-    /* 5. Ép mọi thẻ div con bên trong Content phải rộng 100% */
-    .dashboard-box, 
-    .order-status-box,
-    .dashboard-form-wrapper {
+    .stat-card span {
+        font-size: 9px !important; /* Nhãn cực nhỏ tinh tế */
+        color: #777 !important;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card strong {
+        font-size: 14px !important; 
+        font-weight: 800 !important;
+    }
+
+    /* 6. NÚT ĐIỀU HƯỚNG & NẠP TIỀN: Chỉnh font-weight 700 cho cân đối */
+    .history-tabs-nav {
+        display: flex !important;
+        gap: 8px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .history-tabs-nav a {
+        flex: 1 !important;
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important; 
+        text-align: center !important;
+        border-radius: 10px !important;
+    }
+
+    /* 7. TINH CHỈNH VNPAY: Thu nhỏ tiêu đề và ô nhập liệu */
+    .deposit-container h2 {
+        font-size: 18px !important; /* Hạ từ 22px xuống 18px */
+        font-weight: 700 !important;
+        margin-top: 10px !important;
+    }
+
+    #v_amount {
+        font-size: 18px !important;   /* Hạ kích thước số tiền */
+        font-weight: 700 !important;
+        padding: 10px 15px !important; 
+        height: 48px !important;       
+        text-align: center;
+    }
+
+    .btn-vnpay-custom {
+        padding: 14px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
+    }
+
+    /* 8. FORM & TEXT: Nhỏ gọn tinh tế */
+    .dash-section h4, .dashboard-box h4 {
+        font-size: 11px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .input-item label {
+        font-size: 10px !important;
+        color: #666 !important;
+    }
+
+    .input-item input {
+        font-size: 14px !important;
+        padding: 10px 12px !important;
+        height: 42px !important;
+    }
+
+    .btn-auth {
+        padding: 12px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    /* 9. BẢNG DỮ LIỆU: Kích hoạt vuốt ngang */
+    .history-table-card {
+        padding: 10px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        background: #111;
+        border-radius: 12px;
+    }
+
+    .history-table-card table {
         width: 100% !important;
-        display: block !important;
-        margin-bottom: 15px !important;
+        min-width: 500px !important; /* Ép bảng rộng để không dính chữ */
+    }
+
+    table thead tr th {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        padding: 10px !important;
+    }
+}
+
+/* Thêm đoạn này vào assets/css/style.css */
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #666 !important;
+  opacity: 1; /* Firefox */
+  font-size: 13px;
+  font-weight: 400;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #666 !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #666 !important;
+}
+
+
+/* --- RESPONSIVE FULL DASHBOARD & SHOP (992px) --- */
+@media (max-width: 992px) {
+    /* Thu nhỏ Text toàn trang cho đỡ thô */
+    .card-title, .single-nick-title, h4, h2 { font-size: 13px !important; font-weight: 700 !important; }
+    .spec-item, .meta-bit, .stat-card span { font-size: 10px !important; }
+    .btn-detail, .btn-submit-filter, .btn-auth { font-size: 11px !important; padding: 10px !important; font-weight: 700 !important; }
+
+    /* Fix trượt ngang Menu Dashboard */
+    .dashboard-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        scrollbar-width: none;
+    }
+    .dashboard-menu li { flex: 0 0 auto !important; }
+    .dashboard-menu a { font-size: 11px !important; padding: 8px 12px !important; border-radius: 20px !important; }
+
+    /* Fix Lọc Sản Phẩm */
+    .mobile-filter-trigger { display: block !important; margin-bottom: 10px; }
+    #btn-toggle-filter { 
+        width: 100%; background: #111 !important; border: 1px solid #222 !important; 
+        color: #fff !important; padding: 10px 15px !important; border-radius: 8px; 
+        display: flex; justify-content: space-between; align-items: center; 
+    }
+
+    .shop-filter-wrapper { 
+        display: none; padding: 15px !important; background: #0a0a0a !important; 
+        border: 1px solid #222 !important; border-radius: 10px; margin-bottom: 15px;
+    }
+    
+    .filter-item select { height: 38px !important; font-size: 12px !important; width: 100% !important; }
+    .filter-actions { flex-direction: row !important; gap: 10px !important; }
+    .btn-submit-filter { flex: 2 !important; }
+    .btn-reset-filter { flex: 1 !important; text-align: center; font-size: 11px; }
+
+    /* Fix Lưới Sản Phẩm 2 Cột */
+    .dyat-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .card-thumb { height: 110px !important; }
+    .sale-ribbon { font-size: 12px !important; height: 20px !important; }
+}
+
+/* --- TINH CHỈNH GIAO DIỆN "KHÔNG TÌM THẤY SẢN PHẨM" --- */
+.empty-filter-result {
+    padding: 60px 0 !important; /* Thu gọn khoảng cách trên dưới từ 100px xuống 60px */
+}
+
+.empty-filter-result i.fa-box-open {
+    font-size: 60px !important; /* Giảm biểu tượng từ 80px xuống 60px */
+    margin-bottom: 20px !important;
+}
+
+.empty-filter-result h3 {
+    font-size: 16px !important; /* Giảm tiêu đề từ 20px xuống 16px */
+    margin-bottom: 8px !important;
+    font-weight: 700 !important;
+}
+
+.empty-filter-result p {
+    font-size: 13px !important; /* Giảm mô tả từ 15px xuống 13px */
+    margin-bottom: 25px !important;
+}
+
+.empty-filter-result a {
+    font-size: 12px !important; /* Giảm kích thước chữ trong nút bấm */
+    padding: 10px 20px !important; /* Thu gọn nút bấm cho cân đối */
+}
+
+/* --- SỬA LỖI NÚT XÓA LỌC MOBILE --- */
+@media (max-width: 992px) {
+    .filter-actions {
+        display: flex !important;
+        flex-direction: row !important; /* Đặt 2 nút nằm cạnh nhau */
+        align-items: center !important;
+        gap: 10px !important; /* Khoảng cách giữa 2 nút */
+        margin-top: 15px !important;
+    }
+
+    .btn-submit-filter {
+        flex: 2 !important; /* Nút lọc chiếm 2 phần chiều rộng */
+        font-size: 12px !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+    }
+
+    .btn-reset-filter {
+        flex: 1 !important; /* Nút xóa chiếm 1 phần chiều rộng */
+        background: #1a1a1a !important;
+        border: 1px solid #333 !important;
+        color: #ff4d4d !important; /* Chữ màu đỏ để cảnh báo xóa */
+        padding: 10px !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+    }
+
+    .btn-reset-filter:hover {
+        border-color: #ff4d4d !important;
     }
 }

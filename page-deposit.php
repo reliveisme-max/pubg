@@ -45,8 +45,9 @@ $current_balance = get_field('user_balance', 'user_' . $user_id);
                     <label
                         style="color: #fff; font-weight: bold; display: block; margin-bottom: 12px; font-size: 13px;">SỐ
                         TIỀN MUỐN NẠP (đ)</label>
-                    <input type="number" id="v_amount" value="100000" min="10000"
-                        style="width: 100%; padding: 18px; background: #000; border: 2px solid #222; color: #f39c12; border-radius: 12px; font-size: 22px; font-weight: 800; margin-bottom: 30px;">
+                    <input type="number" id="v_amount" placeholder="Nhập số tiền muốn nạp (Ví dụ: 100000)..."
+                        min="10000"
+                        style="width: 100%; padding: 18px; background: #000; border: 2px solid #222; color: #f39c12; border-radius: 12px; font-size: 18px; font-weight: 700; margin-bottom: 30px;">
 
                     <button id="v_submit" class="btn-vnpay-custom">
                         XÁC NHẬN THANH TOÁN <i class="fa-solid fa-arrow-right-long"></i>
