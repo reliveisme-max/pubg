@@ -154,36 +154,56 @@ jQuery(document).ready(function($) {
      * ==========================================
      */
 
-    // --- Mua Nick ---
-    $('#btn-buy-now').on('click', function(e) {
-        e.preventDefault();
-        var post_id = $(this).data('id');
-        var price = $(this).data('price');
+    // --- Logic Mua Nick (Sửa lỗi khớp biến với PHP) ---
+$('#btn-buy-now').on('click', function(e) {
+    e.preventDefault();
+    var nick_id = $(this).data('id'); // ID của nick
+    var price = $(this).data('price'); // Giá lấy từ data-price mới thêm
 
-        Swal.fire({
-            title: 'XÁC NHẬN MUA NICK',
-            text: "Bạn có chắc chắn muốn mua nick này với giá " + price.toLocaleString() + "đ?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#f39c12',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ĐỒNG Ý MUA',
-            cancelButtonText: 'HỦY',
-            background: '#111',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post(shop_ajax.url, { action: 'buy_nick_action', post_id: post_id }, function(res) {
-                    if (res.success) {
-                        Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: res.data, background: '#111', color: '#fff' })
-                        .then(() => { window.location.href = shop_ajax.home_url + '/lich-su-mua-hang/'; });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'LỖI', text: res.data, background: '#111', color: '#fff' });
-                    }
-                });
-            }
-        });
+    if (!price) {
+        console.error("Lỗi: Thiếu giá sản phẩm!");
+        return;
+    }
+
+    Swal.fire({
+        title: 'XÁC NHẬN MUA NICK',
+        text: "Bạn có chắc chắn muốn mua nick này với giá " + price.toLocaleString() + "đ?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f39c12',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ĐỒNG Ý MUA',
+        cancelButtonText: 'HỦY',
+        background: '#111',
+        color: '#fff'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Sửa post_id thành nick_id để khớp với hàm trong functions.php
+            $.post(shop_ajax.url, { action: 'buy_nick_action', nick_id: nick_id }, function(res) {
+                if (res.success) {
+                    // 1. Điền thông tin vào Modal popup có sẵn trong single-nick-pubg.php
+                    $('#res-user').text(res.data.account);
+                    $('#res-pass').text(res.data.password);
+                    
+                    // 2. Hiển thị Modal thông tin tài khoản
+                    $('#purchase-modal').fadeIn().css('display', 'flex');
+
+                    // 3. Thông báo thành công nhỏ
+                    Swal.fire({ icon: 'success', title: 'THÀNH CÔNG', text: 'Mua tài khoản hoàn tất!', timer: 2000, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'LỖI', text: res.data, background: '#111', color: '#fff' });
+                }
+            });
+        }
     });
+});
+
+// Thêm logic đóng Modal khi mua xong
+$(document).on('click', '.btn-close-modal, .modal-overlay', function(e) {
+    if (e.target !== this) return;
+    $('#purchase-modal').fadeOut();
+    location.reload(); // Reload để cập nhật trạng thái "Đã bán"
+});
 
     // --- Copy Tài khoản / Mật khẩu ---
     // Gán vào window để các thuộc tính onclick="copyV(...)" trong HTML hoạt động

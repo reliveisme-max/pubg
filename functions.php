@@ -15,7 +15,7 @@ function shop_pubg_scripts()
     wp_enqueue_style('google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
     wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), null, true);
-    wp_enqueue_style('main-style', $theme_uri . '/assets/css/style.css', array(), time());
+    wp_enqueue_style('main-style', $theme_uri . '/assets/css/style.css', array(), '1.1');
     wp_enqueue_script('purchase-js', $theme_uri . '/assets/js/purchase.js', array('jquery'), time(), true);
 
     wp_localize_script('purchase-js', 'shop_ajax', array(

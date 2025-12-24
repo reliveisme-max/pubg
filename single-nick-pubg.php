@@ -111,8 +111,14 @@
                             <?php endif; ?>
 
                             <div class="purchase-action-wrapper">
-                                <?php if (is_user_logged_in()) : ?>
-                                    <button class="btn-buy-now-single" id="btn-buy-now" data-id="<?php the_ID(); ?>">
+                                <?php if (is_user_logged_in()) :
+                                    // Tính toán giá để truyền vào data-price
+                                    $p_origin = (int)get_field('gia_ban');
+                                    $p_sale   = (int)get_field('gia_sale');
+                                    $p_final  = ($p_sale > 0) ? $p_sale : $p_origin;
+                                ?>
+                                    <button class="btn-buy-now-single" id="btn-buy-now" data-id="<?php the_ID(); ?>"
+                                        data-price="<?php echo $p_final; ?>">
                                         XÁC NHẬN MUA NGAY <i class="fa-solid fa-cart-shopping"></i>
                                     </button>
                                 <?php else : ?>
