@@ -51,11 +51,38 @@
                     <?php endif; ?>
 
                     <div class="action-icons">
-                        <div class="icon-item">
-                            <a href="<?php echo is_user_logged_in() ? home_url('/tai-khoan/') : home_url('/auth/'); ?>">
-                                <i class="far fa-user"></i>
-                            </a>
-                        </div>
+                        <?php if (is_user_logged_in()) :
+                            $user = wp_get_current_user(); ?>
+                            <div class="user-dropdown-wrapper" id="user-dropdown">
+                                <div class="user-trigger">
+                                    <?php
+                                    $user = wp_get_current_user();
+                                    // Lấy chữ cái đầu tiên của Tên hiển thị (hoặc Login)
+                                    $display_name = $user->display_name ? $user->display_name : $user->user_login;
+                                    $first_letter = strtoupper(substr($display_name, 0, 1));
+                                    ?>
+                                    <div class="user-avatar-header"><?php echo $first_letter; ?></div>
+                                    <i class="fa-solid fa-chevron-down arrow-mini"></i>
+                                </div>
+                                <ul class="dropdown-menu-list">
+                                    <li><a href="<?php echo home_url('/tai-khoan/'); ?>"><i class="fa-solid fa-gauge"></i>
+                                            Tổng quan</a></li>
+                                    <li><a href="<?php echo home_url('/lich-su-mua-hang/'); ?>"><i
+                                                class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn</a></li>
+                                    <li><a href="<?php echo home_url('/nap-tien/'); ?>"><i
+                                                class="fa-solid fa-credit-card"></i> Nạp tiền ví</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="<?php echo wp_logout_url(home_url()); ?>" style="color: #ff4d4d;"><i
+                                                class="fa-solid fa-power-off"></i> Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        <?php else : ?>
+                            <div class="icon-item">
+                                <a href="<?php echo home_url('/auth/'); ?>">
+                                    <i class="far fa-user"></i>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

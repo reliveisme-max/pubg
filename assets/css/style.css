@@ -3384,3 +3384,141 @@ table thead tr th {
         font-weight: 700;
     }
 }
+/* ============================================================
+   HỆ THỐNG USER DROPDOWN - VERSION PILL BORDER CHO CẢ PC & MOBILE
+   ============================================================ */
+
+.user-dropdown-wrapper {
+    position: relative;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+/* Nút nhấn dạng viên thuốc (Pill Border) */
+.user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03); /* Nền mờ */
+    padding: 3px 12px 3px 3px; /* Sát trái ôm avatar, phải rộng cho mũi tên */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Viền mờ tinh tế */
+    border-radius: 30px; 
+    transition: all 0.3s ease;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.user-trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-accent);
+}
+
+/* Vòng tròn Avatar chữ cái */
+.user-avatar-header {
+    width: 32px;
+    height: 32px;
+    background: var(--color-accent);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Mũi tên nhỏ */
+.arrow-mini {
+    font-size: 9px;
+    color: #888;
+    transition: 0.3s;
+}
+
+.user-trigger:hover .arrow-mini {
+    color: #fff;
+    transform: translateY(1px);
+}
+
+/* --- BẢNG MENU THẢ XUỐNG (DROPDOWN LIST) --- */
+.dropdown-menu-list {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 200px;
+    background: #0d0d0d;
+    border: 1px solid #222;
+    border-radius: 12px;
+    list-style: none;
+    padding: 8px;
+    display: none;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+    z-index: 1000;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu-list.active { 
+    display: block; 
+    animation: slideDown 0.25s ease;
+}
+
+.dropdown-menu-list li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.dropdown-menu-list li a:hover {
+    background: #1a1a1a;
+    color: var(--color-accent);
+}
+
+.dropdown-menu-list li a i { 
+    width: 16px; 
+    text-align: center; 
+    font-size: 14px;
+    color: var(--color-accent);
+}
+
+.dropdown-menu-list .divider {
+    height: 1px;
+    background: #222;
+    margin: 6px 5px;
+    list-style: none;
+}
+
+/* --- TỐI ƯU MOBILE: GIỮ NGUYÊN BORDER & HIỆN MŨI TÊN --- */
+@media (max-width: 768px) {
+    .user-trigger {
+        padding: 3px 10px 3px 3px !important; /* Co gọn nhẹ để không chiếm chỗ */
+        width: auto !important; /* Để pill dãn theo nội dung */
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .header-username { 
+        display: none !important; /* Ẩn tên chữ admin cho gọn */
+    }
+    
+    .arrow-mini { 
+        display: block !important; /* Hiện lại mũi tên theo demo 1 của bạn */
+        font-size: 8px !important;
+    }
+    
+    .user-avatar-header {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 14px !important;
+    }
+}

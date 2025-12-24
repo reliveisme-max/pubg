@@ -235,5 +235,16 @@ $(document).on('click', '.btn-close-modal, .modal-overlay', function(e) {
             }
         });
     });
+    // --- Xử lý Dropdown User ở Header ---
+$('#user-dropdown .user-trigger').on('click', function(e) {
+    e.stopPropagation();
+    $('.dropdown-menu-list').toggleClass('active');
+});
+
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('#user-dropdown').length) {
+        $('.dropdown-menu-list').removeClass('active');
+    }
+});
 
 });
