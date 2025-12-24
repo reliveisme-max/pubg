@@ -2,7 +2,40 @@ jQuery(document).ready(function($) {
 
     /**
      * ==========================================
-     * 1. HỆ THỐNG ĐĂNG NHẬP / ĐĂNG KÝ / QUÊN MK
+     * 1. HỆ THỐNG GIAO DIỆN (MENU & FILTER)
+     * ==========================================
+     */
+
+    // --- Mở/Đóng Menu Mobile ---
+    $('#open-menu').on('click', function() {
+        $('#mobile-menu').addClass('active');
+        $('body').css('overflow', 'hidden'); 
+    });
+
+    $('#close-menu').on('click', function() {
+        $('#mobile-menu').removeClass('active');
+        $('body').css('overflow', 'auto');
+    });
+
+    // Đóng menu khi bấm ra ngoài vùng menu
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#mobile-menu, #open-menu').length) {
+            $('#mobile-menu').removeClass('active');
+            $('body').css('overflow', 'auto');
+        }
+    });
+
+    // --- Toggle bộ lọc trên Mobile ---
+    $('#btn-toggle-filter').on('click', function() {
+        $('.shop-filter-wrapper').toggleClass('active');
+        // Xoay mũi tên khi đóng/mở
+        $(this).find('.arrow-icon').toggleClass('fa-chevron-down fa-chevron-up');
+    });
+
+
+    /**
+     * ==========================================
+     * 2. HỆ THỐNG AUTH (ĐĂNG NHẬP / ĐĂNG KÝ / OTP)
      * ==========================================
      */
 
@@ -46,7 +79,7 @@ jQuery(document).ready(function($) {
     });
 
     /**
-     * --- Gửi OTP (Dùng chung cho Đăng ký & Quên MK) ---
+     * --- Hàm Gửi OTP (Dùng chung cho Đăng ký & Quên MK) ---
      */
     function sendOTP(email, btn, actionType) {
         if(!email) { 
@@ -82,7 +115,7 @@ jQuery(document).ready(function($) {
     });
 
     /**
-     * --- Submit các Form Auth ---
+     * --- Submit các Form Auth (Login/Reg/Reset) ---
      */
     $('#login-form, #reg-form, #forgot-form').on('submit', function(e) {
         e.preventDefault();
@@ -117,7 +150,7 @@ jQuery(document).ready(function($) {
 
     /**
      * ==========================================
-     * 2. HỆ THỐNG CŨ (MUA NICK / COPY / NẠP TIỀN)
+     * 3. HỆ THỐNG CŨ (MUA NICK / COPY / ĐỔI MK)
      * ==========================================
      */
 
@@ -153,6 +186,7 @@ jQuery(document).ready(function($) {
     });
 
     // --- Copy Tài khoản / Mật khẩu ---
+    // Gán vào window để các thuộc tính onclick="copyV(...)" trong HTML hoạt động
     window.copyV = function(id) {
         var text = document.getElementById(id).innerText;
         navigator.clipboard.writeText(text).then(() => {
@@ -166,7 +200,7 @@ jQuery(document).ready(function($) {
                 color: '#fff'
             });
         });
-    }
+    };
 
     // --- Đổi mật khẩu trong Dashboard ---
     $('#change-pass-form').on('submit', function(e) {
@@ -182,39 +216,4 @@ jQuery(document).ready(function($) {
         });
     });
 
-});
-
-
-jQuery(document).ready(function($) {
-    // --- 1. MỞ/ĐÓNG MENU MOBILE ---
-    $('#open-menu').on('click', function() {
-        $('#mobile-menu').addClass('active');
-        $('body').css('overflow', 'hidden'); 
-    });
-
-    $('#close-menu').on('click', function() {
-        $('#mobile-menu').removeClass('active');
-        $('body').css('overflow', 'auto');
-    });
-
-    // Đóng menu khi bấm ra ngoài vùng menu
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#mobile-menu, #open-menu').length) {
-            $('#mobile-menu').removeClass('active');
-            $('body').css('overflow', 'auto');
-        }
-    });
-
-    // --- (GIỮ NGUYÊN CÁC LOGIC AUTH, MUA HÀNG, NẠP TIỀN PHÍA DƯỚI) ---
-});
-
-
-jQuery(document).ready(function($) {
-    // Toggle bộ lọc trên Mobile
-    $('#btn-toggle-filter').on('click', function() {
-        $('.shop-filter-wrapper').toggleClass('active');
-        
-        // Xoay mũi tên khi đóng/mở
-        $(this).find('.arrow-icon').toggleClass('fa-chevron-down fa-chevron-up');
-    });
 });
