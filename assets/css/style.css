@@ -1850,112 +1850,292 @@ table thead tr th {
     .sale-ribbon { font-size: 12px !important; height: 20px !important; }
 }
 
-/* --- TINH CHỈNH GIAO DIỆN "KHÔNG TÌM THẤY SẢN PHẨM" --- */
-.empty-filter-result {
-    padding: 60px 0 !important; /* Thu gọn khoảng cách trên dưới từ 100px xuống 60px */
+
+
+
+
+
+/* ============================================================
+   BỘ LỌC TỔNG HỢP (PC: THANH NGANG - MOBILE: POPUP CENTER) 
+  
+   ============================================================ */
+
+/* --- 1. PHẦN BREADCRUMB (ĐỂ CÂN ĐỐI KHOẢNG CÁCH TRÊN PC) --- */
+.shop-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px !important; /* Thu hẹp để bộ lọc không hở quá to */
+    padding: 5px 0 !important;
+    font-size: 13px;
+    color: #888;
 }
 
-.empty-filter-result i.fa-box-open {
-    font-size: 60px !important; /* Giảm biểu tượng từ 80px xuống 60px */
-    margin-bottom: 20px !important;
+/* --- 2. GIAO DIỆN BỘ LỌC TRÊN PC (THANH NGANG) --- */
+/* Ẩn các tiêu đề mobile khi ở PC */
+.mobile-filter-trigger, 
+.filter-modal-header, 
+.filter-overlay { 
+    display: none; 
 }
 
-.empty-filter-result h3 {
-    font-size: 16px !important; /* Giảm tiêu đề từ 20px xuống 16px */
-    margin-bottom: 8px !important;
-    font-weight: 700 !important;
+.shop-filter-wrapper {
+    background: var(--bg-card);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    /* Spacing: Trên 20px (tránh menu), Dưới 30px (tránh dính lưới sản phẩm) */
+    margin: 20px 0 30px 0 !important; 
+    width: 100% !important; /* Độ rộng khớp 100% container web */
+    position: relative;
+    z-index: 10;
 }
 
-.empty-filter-result p {
-    font-size: 13px !important; /* Giảm mô tả từ 15px xuống 13px */
-    margin-bottom: 25px !important;
+.filter-form { 
+    display: flex; 
+    flex-wrap: nowrap; /* Ép hàng ngang trên PC */
+    gap: 15px; 
+    align-items: flex-end; 
 }
 
-.empty-filter-result a {
-    font-size: 12px !important; /* Giảm kích thước chữ trong nút bấm */
-    padding: 10px 20px !important; /* Thu gọn nút bấm cho cân đối */
+.filter-modal-body { 
+    display: flex; 
+    gap: 15px; 
+    flex: 1; 
 }
 
+.filter-item { flex: 1; }
 
+.filter-item label { 
+    display: block; 
+    font-size: 11px; 
+    color: #666; 
+    font-weight: 800; 
+    margin-bottom: 6px; 
+    text-transform: uppercase; 
+}
 
+.filter-item select { 
+    width: 100%; 
+    background: #000 !important; 
+    border: 1px solid #333 !important; 
+    color: #fff !important; 
+    padding: 10px !important; 
+    border-radius: 6px !important; 
+    height: 40px !important; 
+}
 
+/* Cụm nút bấm trên PC */
+.filter-modal-footer { 
+    display: flex; 
+    gap: 8px; 
+    align-items: flex-end; 
+}
 
-/* --- FIX LỖI MỜ Z-INDEX VÀ CĂN GIỮA ICON --- */
+.btn-submit-filter { 
+    background: var(--color-accent) !important; 
+    color: #000 !important; 
+    border: none; 
+    padding: 0 20px; 
+    border-radius: 6px; 
+    font-weight: 800; 
+    cursor: pointer; 
+    height: 40px; 
+    white-space: nowrap; 
+}
+
+.btn-reset-filter { 
+    background: #222; 
+    color: #ff4d4d; 
+    border: 1px solid #444; 
+    border-radius: 6px; 
+    padding: 0 15px; 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 700; 
+    height: 40px; 
+    display: flex; 
+    align-items: center; 
+    white-space: nowrap; 
+}
+
+/* ============================================================
+   HỆ THỐNG BỘ LỌC (PC & MOBILE POPUP CENTER) - TINH CHỈNH NÚT
+  
+   ============================================================ */
+
+/* --- 1. PHẦN BREADCRUMB --- */
+.shop-breadcrumb {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px !important; padding: 5px 0 !important;
+    font-size: 13px; color: #888;
+}
+
+/* --- 2. GIAO DIỆN BỘ LỌC TRÊN PC (THANH NGANG CHUẨN) --- */
+.mobile-filter-trigger, .filter-modal-header, .filter-overlay { display: none; }
+
+.shop-filter-wrapper {
+    background: var(--bg-card); padding: 12px 18px; /* Thu gọn padding */
+    border-radius: 8px; border: 1px solid #222;
+    margin: 20px 0 30px 0 !important; width: 100% !important; 
+    position: relative; z-index: 10;
+}
+
+.filter-form { display: flex; flex-wrap: nowrap; gap: 12px; align-items: flex-end; }
+.filter-modal-body { display: flex; gap: 12px; flex: 1; }
+.filter-item { flex: 1; }
+.filter-item label { display: block; font-size: 11px; color: #666; font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
+.filter-item select { width: 100%; background: #000 !important; border: 1px solid #333 !important; color: #fff !important; padding: 8px !important; border-radius: 6px !important; height: 38px !important; font-size: 13px !important; }
+
+/* Nút PC nhỏ gọn (38px) */
+.filter-actions-group { display: flex; gap: 8px; align-items: flex-end; }
+.btn-submit-filter { background: var(--color-accent) !important; color: #000 !important; border: none; padding: 0 15px; border-radius: 6px; font-weight: 800; cursor: pointer; height: 38px; white-space: nowrap; font-size: 12px; }
+.btn-reset-filter { background: #222; color: #ff4d4d; border: 1px solid #444; border-radius: 6px; padding: 0 12px; text-decoration: none; font-size: 11px; font-weight: 700; height: 38px; display: flex; align-items: center; white-space: nowrap; }
+
+/* --- 3. GIAO DIỆN BỘ LỌC TRÊN MOBILE (POPUP CENTER & TINH GỌN NÚT) --- */
 @media (max-width: 992px) {
-    /* Overlay (Nền mờ) - z-index phải thấp hơn Sidebar */
-    .filter-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: rgba(0, 0, 0, 0.7) !important;
-        z-index: 999998 !important; /* Lớp dưới cùng */
-        display: none;
-        backdrop-filter: blur(4px);
+    .mobile-filter-trigger { display: block !important; margin: 10px 0 20px 0; }
+
+    /* Nút Trigger Mobile: Thu nhỏ padding & font-size */
+    #btn-toggle-filter { 
+        width: 100%; background: #111 !important; 
+        border: 1px solid var(--color-accent) !important; color: var(--color-accent) !important; 
+        padding: 10px 16px; /* Giảm từ 14px xuống 10px */
+        border-radius: 10px; display: flex; justify-content: space-between; align-items: center; 
+        font-weight: 800; text-transform: uppercase; font-size: 12px; /* Giảm font-size */
+        letter-spacing: 0.5px; transition: 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    /* Sidebar Lọc - z-index CAO NHẤT */
+    /* Popup Modal */
+    .filter-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 999998 !important; display: none; backdrop-filter: blur(8px); }
     .shop-filter-wrapper {
-        position: fixed !important;
-        top: 0;
-        right: -100% !important; 
-        width: 85% !important;
-        max-width: 320px !important;
-        height: 100vh !important;
-        background: #0d0d0d !important;
-        z-index: 999999 !important; /* Luôn nằm trên Overlay */
-        display: block !important;
-        transition: right 0.4s ease !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
-        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(0.9) !important;
+        width: 92% !important; max-width: 380px !important; max-height: 85vh !important;
+        z-index: 999999 !important; background: #0d0d0d !important; padding: 0 !important; border-radius: 15px !important;
+        opacity: 0; visibility: hidden; transition: 0.3s; display: block !important; border: 1px solid #333 !important;
     }
+    .shop-filter-wrapper.show-popup { opacity: 1 !important; visibility: visible !important; transform: translate(-50%, -50%) scale(1) !important; }
 
-    .shop-filter-wrapper.active {
-        right: 0 !important; /* Trượt vào màn hình */
+    .filter-modal-header { display: flex !important; justify-content: space-between; align-items: center; padding: 12px 18px; background: #1a1a1a; border-bottom: 1px solid #222; border-radius: 15px 15px 0 0; }
+    .filter-modal-header span { color: var(--color-accent); font-weight: 800; font-size: 13px; }
+    #btn-close-filter { color: #fff; font-size: 20px; cursor: pointer; }
+
+    .filter-modal-body { display: flex !important; flex-direction: column !important; gap: 15px !important; padding: 18px !important; overflow-y: auto; }
+    .filter-form { display: block !important; }
+    .filter-item { width: 100% !important; margin-bottom: 10px; }
+
+    /* Nút Action trong Popup: Thu thấp chiều cao */
+    .filter-actions-group { 
+        padding: 12px 18px; background: #1a1a1a; border-top: 1px solid #222; 
+        display: flex !important; gap: 10px !important; 
     }
+    .btn-submit-filter, .btn-reset-filter { 
+        flex: 1; height: 42px !important; /* Giảm từ 50px xuống 42px */
+        font-size: 13px !important; display: flex !important; align-items: center; justify-content: center; border-radius: 8px !important;
+    }
+}
 
-    /* FIX LỖI ICON "KHÔNG TÌM THẤY" BỊ LỆCH */
-    .empty-filter-result {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important; /* Căn giữa ngang */
-        justify-content: center !important; 
-        text-align: center !important;
+/* --- 4. GIAO DIỆN KHÔNG TÌM THẤY (EMPTY RESULT) - TINH GỌN --- */
+.empty-filter-result {
+    text-align: center !important; padding: 60px 20px !important; 
+    background: rgba(255, 255, 255, 0.02) !important; border-radius: 12px !important;
+    border: 1px dashed #333 !important; margin: 20px 0 40px 0 !important;
+    display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;
+}
+.empty-filter-result i.fa-box-open { font-size: 55px !important; color: #222 !important; margin: 0 auto 20px auto !important; display: block !important; }
+.empty-filter-result h3 { color: #fff !important; font-size: 17px !important; font-weight: 800 !important; text-transform: uppercase !important; margin-bottom: 8px !important; }
+.empty-filter-result p { color: #777 !important; font-size: 13px !important; margin-bottom: 25px !important; max-width: 350px; line-height: 1.5; }
+
+/* Nút quay lại tinh tế hơn */
+.empty-filter-result a {
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    background: var(--color-accent) !important; color: #000 !important;
+    padding: 10px 25px !important; /* Thu gọn nút */
+    border-radius: 8px !important; font-weight: 900 !important; text-decoration: none !important;
+    font-size: 12px !important; transition: 0.3s; text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(255, 174, 0, 0.15);
+}
+.empty-filter-result a:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 18px rgba(255, 174, 0, 0.3); }
+
+
+
+/* --- HỆ THỐNG ẨN HIỆN CHUẨN --- */
+@media (min-width: 993px) {
+    .d-none-desktop { display: none !important; }
+    .pc-balance-wrapper { margin-right: 15px; display: block; }
+    .header-search { flex: 1 !important; margin: 0 40px !important; }
+}
+
+@media (max-width: 992px) {
+    .d-none-mobile { display: none !important; }
+}
+
+/* --- MOBILE USER CARD: FIX CÂN NÚT (THEO SNIPPET BẠN GỬI) --- */
+@media (max-width: 992px) {
+    .mobile-nav-user-area {
+        margin: 0 !important; /* Phẳng 100% bằng menu */
         width: 100% !important;
-        padding: 80px 20px !important;
+        background: #111 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
     }
 
-    .empty-filter-result i.fa-box-open {
-        margin: 0 auto 25px auto !important; /* Căn giữa icon block */
-        display: block !important;
-        font-size: 70px !important;
-        color: #333 !important;
-    }
-
-    /* Fix màu nút Xóa lọc sáng rõ hơn */
-    .btn-reset-filter {
-        flex: 1 !important;
-        background: #2a2a2a !important;
-        color: #ff7675 !important;
-        border: 1px solid #444 !important;
-        border-radius: 8px !important;
+    .user-card-clickable {
         text-decoration: none !important;
-        display: flex !important;
+        display: block;
+        width: 100%;
+    }
+
+    /* UPDATE THEO SNIPPET CỦA BẠN: Bỏ padding, dùng margin-bottom và flex-end */
+    .user-card-inner {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        padding: 15px; /* Giữ một chút padding lề trái phải để không sát mép màn hình */
+    }
+
+    .user-meta-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .welcome-text {
+        display: block;
+        font-size: 10px;
+        color: #555;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-bottom: 4px;
+        letter-spacing: 1px;
+    }
+
+    /* Số tiền hiển thị to rõ */
+    .user-balance-value .nav-balance-box {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        font-size: 26px !important;
+        color: var(--color-accent) !important;
+        font-weight: 900 !important;
+        height: auto !important;
+        line-height: 1 !important;
+    }
+    
+    .user-balance-value .nav-balance-box i { display: none !important; }
+
+    /* ICON BOX (40x40px chuẩn cân nút) */
+    .user-icon-box {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 174, 0, 0.05);
+        border: 1px solid rgba(255, 174, 0, 0.2);
+        border-radius: 10px;
+        display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700 !important;
+        color: var(--color-accent);
+        font-size: 18px;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

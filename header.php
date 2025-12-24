@@ -40,12 +40,14 @@
                 </div>
 
                 <div class="header-actions">
-                    <?php echo do_shortcode('[user_balance]'); ?>
+                    <div class="pc-balance-wrapper d-none-mobile">
+                        <?php echo do_shortcode('[user_balance]'); ?>
+                    </div>
 
                     <?php if (is_user_logged_in()) : ?>
-                        <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit hide-mobile">Nạp Tiền</a>
+                        <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit d-none-mobile">Nạp Tiền</a>
                     <?php else : ?>
-                        <a href="<?php echo home_url('/auth/'); ?>" class="btn-deposit hide-mobile">Nạp Tiền</a>
+                        <a href="<?php echo home_url('/auth/'); ?>" class="btn-deposit d-none-mobile">Nạp Tiền</a>
                     <?php endif; ?>
 
                     <div class="action-icons">
@@ -75,11 +77,23 @@
                     <i class="fa-solid fa-xmark" id="close-menu"></i>
                 </div>
 
-                <div class="mobile-nav-deposit">
-                    <a href="<?php echo home_url('/nap-tien/'); ?>" class="btn-deposit-mobile">
-                        <i class="fa-solid fa-credit-card"></i> NẠP TIỀN NGAY
-                    </a>
-                </div>
+                <?php if (is_user_logged_in()) : ?>
+                    <div class="mobile-nav-user-area d-none-desktop">
+                        <a href="<?php echo home_url('/nap-tien/'); ?>" class="user-card-clickable">
+                            <div class="user-card-inner">
+                                <div class="user-meta-info">
+                                    <span class="welcome-text">SỐ DƯ TÀI KHOẢN</span>
+                                    <div class="user-balance-value">
+                                        <?php echo do_shortcode('[user_balance]'); ?>
+                                    </div>
+                                </div>
+                                <div class="user-icon-box">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <?php endif; ?>
 
                 <?php
                 wp_nav_menu(array(
