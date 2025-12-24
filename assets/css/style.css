@@ -1882,67 +1882,69 @@ table thead tr th {
 
 /* --- FIX LỖI MỜ Z-INDEX VÀ CĂN GIỮA ICON --- */
 @media (max-width: 992px) {
-    /* 1. Overlay (Nền mờ) - z-index phải thấp hơn Sidebar */
+    /* Overlay (Nền mờ) - z-index phải thấp hơn Sidebar */
     .filter-overlay {
         position: fixed;
         top: 0; left: 0;
         width: 100vw; height: 100vh;
         background: rgba(0, 0, 0, 0.7) !important;
-        z-index: 999998 !important; /* Luôn thấp hơn Sidebar */
+        z-index: 999998 !important; /* Lớp dưới cùng */
         display: none;
         backdrop-filter: blur(4px);
     }
 
-    /* 2. Sidebar Lọc - z-index cao nhất để không bị mờ */
+    /* Sidebar Lọc - z-index CAO NHẤT */
     .shop-filter-wrapper {
         position: fixed !important;
         top: 0;
         right: -100% !important; 
         width: 85% !important;
-        max-width: 300px !important;
+        max-width: 320px !important;
         height: 100vh !important;
         background: #0d0d0d !important;
-        z-index: 999999 !important; /* CAO NHẤT */
+        z-index: 999999 !important; /* Luôn nằm trên Overlay */
         display: block !important;
         transition: right 0.4s ease !important;
         padding: 0 !important;
         margin: 0 !important;
         border: none !important;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
 
     .shop-filter-wrapper.active {
-        right: 0 !important;
+        right: 0 !important; /* Trượt vào màn hình */
     }
 
-    /* 3. FIX LỖI CĂN GIỮA ICON "KHÔNG TÌM THẤY" */
+    /* FIX LỖI ICON "KHÔNG TÌM THẤY" BỊ LỆCH */
     .empty-filter-result {
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important; /* Căn ngang */
-        justify-content: center !important; /* Căn dọc */
+        align-items: center !important; /* Căn giữa ngang */
+        justify-content: center !important; 
         text-align: center !important;
         width: 100% !important;
         padding: 80px 20px !important;
     }
 
     .empty-filter-result i.fa-box-open {
-        margin: 0 auto 20px auto !important; /* Ép icon nằm giữa */
+        margin: 0 auto 25px auto !important; /* Căn giữa icon block */
         display: block !important;
         font-size: 70px !important;
         color: #333 !important;
     }
 
-    /* Nút Xóa lọc sáng hơn */
+    /* Fix màu nút Xóa lọc sáng rõ hơn */
     .btn-reset-filter {
         flex: 1 !important;
-        background: #222 !important;
-        color: #ff4d4d !important;
+        background: #2a2a2a !important;
+        color: #ff7675 !important;
         border: 1px solid #444 !important;
         border-radius: 8px !important;
         text-decoration: none !important;
         display: flex !important;
         align-items: center;
         justify-content: center;
+        font-weight: 700 !important;
     }
 }
 
