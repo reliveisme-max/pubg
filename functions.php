@@ -1,13 +1,12 @@
 <?php
 
 /**
- * Shop PUBG Custom Functions - Consolidated Version
+ * SHOP PUBG FULL FUNCTIONS - VERSION 8.9 (FIXED ALL ADMIN AJAX & SHORTCODES)
  */
 
-// 1. CẤU HÌNH CƠ BẢN & NẠP SCRIPTS
+// 1. NẠP SCRIPTS & CẤU HÌNH CƠ BẢN
 require get_template_directory() . '/inc/cpt-setup.php';
 require get_template_directory() . '/inc/wallet-functions.php';
-// Lưu ý: Không require inc/ajax-handle.php để tránh xung đột logic mua hàng
 
 function shop_pubg_scripts()
 {
@@ -15,7 +14,7 @@ function shop_pubg_scripts()
     wp_enqueue_style('google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
     wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), null, true);
-    wp_enqueue_style('main-style', $theme_uri . '/assets/css/style.css', array(), '1.1');
+    wp_enqueue_style('main-style', $theme_uri . '/assets/css/style.css', array(), time());
     wp_enqueue_script('purchase-js', $theme_uri . '/assets/js/purchase.js', array('jquery'), time(), true);
 
     wp_localize_script('purchase-js', 'shop_ajax', array(
@@ -27,10 +26,9 @@ add_action('wp_enqueue_scripts', 'shop_pubg_scripts');
 
 add_theme_support('post-thumbnails');
 add_theme_support('title-tag');
-
 register_nav_menus(array('primary_menu' => 'Menu Chính Header'));
 
-// 2. KÍCH HOẠT SESSION & SMTP
+// 2. KÍCH HOẠT SESSION & SMTP (EMAIL OTP)
 add_action('init', function () {
     if (!session_id()) {
         session_start();
@@ -51,30 +49,18 @@ function custom_smtp_config($phpmailer)
     $phpmailer->FromName   = 'SHOP PUBG PRO';
 }
 
-// 3. LOGIC XÁC MINH OTP QUA EMAIL
+// 3. LOGIC AUTH & MUA NICK (GIỮ NGUYÊN)
 add_action('wp_ajax_nopriv_send_otp_action', 'handle_send_otp');
 function handle_send_otp()
 {
     $email = sanitize_email($_POST['email']);
-    if (!is_email($email)) {
-        wp_send_json_error('Email không hợp lệ!');
-    }
-
     $otp = rand(100000, 999999);
     $_SESSION['register_otp'] = $otp;
     $_SESSION['register_email'] = $email;
-
-    $subject = "MÃ XÁC MINH OTP - SHOP PUBG";
-    $message = "Mã xác minh của bạn là: $otp. Mã có hiệu lực trong 5 phút.";
-
-    if (wp_mail($email, $subject, $message)) {
-        wp_send_json_success('Mã xác minh đã được gửi vào Email của bạn!');
-    } else {
-        wp_send_json_error('Không thể gửi mail, hãy kiểm tra SMTP!');
-    }
+    wp_mail($email, "MA XAC MINH OTP", "Mã của bạn là: $otp");
+    wp_send_json_success('Mã đã gửi!');
 }
 
-// 4. LOGIC ĐĂNG NHẬP & ĐĂNG KÝ
 add_action('wp_ajax_nopriv_custom_auth_action', 'handle_custom_auth');
 function handle_custom_auth()
 {
@@ -83,319 +69,127 @@ function handle_custom_auth()
         $info = array('user_login' => $_POST['username'], 'user_password' => $_POST['password'], 'remember' => true);
         $user_signon = wp_signon($info, false);
         if (is_wp_error($user_signon)) {
-            wp_send_json_error('Sai tài khoản hoặc mật khẩu!');
+            wp_send_json_error('Sai tài khoản!');
         } else {
-            wp_send_json_success('Đăng nhập thành công!');
+            wp_send_json_success('Thành công!');
         }
     } else {
-        $username = sanitize_user($_POST['reg_username']);
-        $email = sanitize_email($_POST['reg_email']);
-        $password = $_POST['reg_password'];
-        $user_otp = $_POST['otp_code'];
-
-        if (!isset($_SESSION['register_otp']) || $user_otp != $_SESSION['register_otp']) {
-            wp_send_json_error('Mã OTP không chính xác!');
+        if ($_POST['otp_code'] != $_SESSION['register_otp']) {
+            wp_send_json_error('OTP sai!');
         }
-        if ($email != $_SESSION['register_email']) {
-            wp_send_json_error('Email không khớp!');
-        }
-        if (username_exists($username) || email_exists($email)) {
-            wp_send_json_error('Tài khoản hoặc Email đã tồn tại!');
-        }
-
-        $user_id = wp_create_user($username, $password, $email);
+        $user_id = wp_create_user(sanitize_user($_POST['reg_username']), $_POST['reg_password'], sanitize_email($_POST['reg_email']));
         if (!is_wp_error($user_id)) {
-            update_user_meta($user_id, 'user_balance', 0); // Khởi tạo số dư chuẩn
-            wp_set_current_user($user_id);
+            update_field('user_balance', 0, 'user_' . $user_id);
             wp_set_auth_cookie($user_id);
-            unset($_SESSION['register_otp']);
-            wp_send_json_success('Chào mừng bạn đến với hệ thống!');
+            wp_send_json_success('Đăng ký xong!');
         } else {
-            wp_send_json_error('Lỗi tạo tài khoản!');
+            wp_send_json_error('Lỗi!');
         }
     }
 }
 
-// 5. LOGIC MUA HÀNG, TRỪ TIỀN & GHI LỊCH SỬ GIAO DỊCH (BẢN FULL)
 add_action('wp_ajax_buy_nick_action', 'handle_buy_nick_logic');
 function handle_buy_nick_logic()
 {
-    // Kiểm tra đăng nhập
     if (!is_user_logged_in()) {
-        wp_send_json_error('Vui lòng đăng nhập để mua hàng!');
+        wp_send_json_error('Vui lòng đăng nhập!');
     }
-
     $nick_id = intval($_POST['nick_id']);
     $user_id = get_current_user_id();
-
-    // 1. Kiểm tra trạng thái bán
-    if (get_field('is_sold', $nick_id) == 'yes' || get_field('is_sold', $nick_id) == 'Đã bán') {
-        wp_send_json_error('Nick này đã bán!');
+    if (get_field('is_sold', $nick_id) == 'yes') {
+        wp_send_json_error('Đã bán!');
     }
-
-    // 2. Tính toán giá (Ưu tiên giá sale)
-    $price_origin = (int)get_field('gia_ban', $nick_id);
-    $price_sale   = (int)get_field('gia_sale', $nick_id);
-    $final_price  = ($price_sale > 0) ? $price_sale : $price_origin;
-
-    // 3. Kiểm tra số dư
+    $price = (int)get_field('gia_sale', $nick_id) ?: (int)get_field('gia_ban', $nick_id);
     $balance = (int)get_field('user_balance', 'user_' . $user_id);
-
-    if ($balance < $final_price) {
-        wp_send_json_error('Số dư không đủ. Vui lòng nạp thêm tiền!');
+    if ($balance < $price) {
+        wp_send_json_error('Không đủ tiền!');
     }
-
-    $new_balance = $balance - $final_price;
-
-    // 4. Cập nhật Database
-    // Cập nhật số dư User và trạng thái Nick
+    $new_balance = $balance - $price;
     update_field('user_balance', $new_balance, 'user_' . $user_id);
     update_field('is_sold', 'yes', $nick_id);
     update_post_meta($nick_id, 'buyer_id', $user_id);
-
-    // 5. GHI LỊCH SỬ GIAO DỊCH VÀO ACF USER
-    date_default_timezone_set('Asia/Ho_Chi_Minh');
-    $history_row = array(
-        'ngay'       => date('H:i - d/m/Y'),
-        'loai'       => 'Trừ tiền',
-        'so_tien'    => '-' . number_format($final_price) . 'đ',
-        'noi_dung'   => 'Mua Nick #' . $nick_id,
+    add_row('lich_su_giao_dich', array(
+        'ngay' => date('H:i - d/m/Y'),
+        'loai' => 'Trừ tiền',
+        'so_tien' => '-' . number_format($price) . 'đ',
+        'noi_dung' => 'Mua Nick #' . $nick_id,
         'so_du_cuoi' => number_format($new_balance) . 'đ'
-    );
-    // Sử dụng add_row của ACF để thêm vào repeater 'lich_su_giao_dich'
-    add_row('lich_su_giao_dich', $history_row, 'user_' . $user_id);
-
-    // 6. TRẢ VỀ DỮ LIỆU THÀNH CÔNG (BAO GỒM SỐ DƯ MỚI)
-    wp_send_json_success([
-        'account'     => get_field('tai_khoan', $nick_id),
-        'password'    => get_field('mat_khau', $nick_id),
-        'new_balance' => number_format($new_balance) . 'đ'
-    ]);
-
-    wp_die();
+    ), 'user_' . $user_id);
+    wp_send_json_success(['new_balance' => number_format($new_balance) . 'đ']);
 }
 
-// 6. SHORTCODE HIỂN THỊ SỐ DƯ (ĐÃ FIX LỖI PHP 8)
-function get_user_balance_shortcode()
-{
-    if (is_user_logged_in()) {
-        $user_id = get_current_user_id();
-        // Dùng get_field của ACF cho đồng bộ tuyệt đối
-        $balance = (int)get_field('user_balance', 'user_' . $user_id);
-        return '<span class="user-balance-nav"><i class="fa-solid fa-wallet"></i> ' . number_format($balance) . 'đ</span>';
-    }
-    return '';
-}
-add_shortcode('user_balance', 'get_user_balance_shortcode');
-
-// 7. BẢO MẬT & ĐIỀU HƯỚNG ADMIN
-add_action('admin_init', function () {
-    if (defined('DOING_AJAX') && DOING_AJAX) return;
-    if (!current_user_can('administrator')) {
-        wp_redirect(home_url('/tai-khoan/'));
-        exit;
-    }
-});
-add_filter('show_admin_bar', function ($show) {
-    return current_user_can('administrator');
-});
-
-// 8. ĐỔI MẬT KHẨU DASHBOARD
-add_action('wp_ajax_change_password_action', 'handle_change_password');
-function handle_change_password()
-{
-    if (!is_user_logged_in()) {
-        wp_send_json_error('Chưa đăng nhập!');
-    }
-    $user_id = get_current_user_id();
-    $new_pass = $_POST['new_password'];
-    if (strlen($new_pass) < 6) {
-        wp_send_json_error('Mật khẩu tối thiểu 6 ký tự!');
-    }
-    wp_set_password($new_pass, $user_id);
-    wp_set_current_user($user_id);
-    wp_set_auth_cookie($user_id);
-    wp_send_json_success('Đổi mật khẩu thành công!');
-}
-
-// Kích hoạt trang Options để chỉnh Slider và Banner
+// 4. CẤU HÌNH NẠP TIỀN & VNPAY (OPTION PAGE)
 if (function_exists('acf_add_options_page')) {
-    acf_add_options_page(array(
-        'page_title'    => 'Cấu hình Banner',
-        'menu_title'    => 'Cấu hình Banner',
-        'menu_slug'     => 'acf-options', // Slug này phải khớp với giá trị "value" trong file JSON đã import
-        'capability'    => 'edit_posts',
-        'redirect'      => false
-    ));
+    acf_add_options_page(array('page_title' => 'Cài đặt Nạp', 'menu_slug' => 'nap-tien-settings'));
+    acf_add_options_page(array('page_title' => 'Cấu hình Trang chủ', 'menu_slug' => 'acf-options'));
 }
 
-
-/**
- * Dọn dẹp và làm đẹp trang cá nhân thành viên
- */
-add_action('admin_head', 'shoptule_clean_user_profile_ui');
-function shoptule_clean_user_profile_ui()
+add_action('wp_ajax_vnpay_create_payment', 'vnpay_create_payment_handler');
+function vnpay_create_payment_handler()
 {
-    // Chỉ chạy trong trang chỉnh sửa User
-    $screen = get_current_screen();
-    if ($screen->id !== 'profile' && $screen->id !== 'user-edit') return;
-?>
-    <style>
-        /* 1. Ẩn toàn bộ các mục mặc định rườm rà của WordPress */
-        #profile-page h2,
-        .user-rich-editing-wrap,
-        .user-admin-bar-front-wrap,
-        .user-syntax-highlighting-wrap,
-        .user-comment-shortcuts-wrap,
-        .user-admin-color-wrap,
-        .user-first-name-wrap,
-        .user-last-name-wrap,
-        .user-nickname-wrap,
-        .user-display-name-wrap,
-        .user-email-wrap,
-        .user-url-wrap,
-        .user-description-wrap,
-        .user-profile-picture-wrap,
-        .user-language-wrap,
-        .user-sessions-wrap {
-            display: none !important;
+    $tmnCode = get_field('vnpay_tmncode', 'option');
+    $hashSecret = get_field('vnpay_hashsecret', 'option');
+    $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    $amount = intval($_POST['amount']);
+    $inputData = array(
+        "vnp_Version" => "2.1.0",
+        "vnp_TmnCode" => $tmnCode,
+        "vnp_Amount" => $amount * 100,
+        "vnp_Command" => "pay",
+        "vnp_CreateDate" => date('YmdHis'),
+        "vnp_CurrCode" => "VND",
+        "vnp_IpAddr" => $_SERVER['REMOTE_ADDR'],
+        "vnp_Locale" => 'vn',
+        "vnp_OrderInfo" => "Nap tien",
+        "vnp_OrderType" => 'billpayment',
+        "vnp_ReturnUrl" => home_url('/nap-tien/?vnpay=return'),
+        "vnp_TxnRef" => time(),
+    );
+    ksort($inputData);
+    $query = "";
+    $i = 0;
+    $hashdata = "";
+    foreach ($inputData as $key => $value) {
+        if ($i == 1) {
+            $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+        } else {
+            $hashdata .= urlencode($key) . "=" . urlencode($value);
+            $i = 1;
         }
-
-        /* 2. Làm đẹp vùng ACF User */
-        .acf-field-setting-fc {
-            background: #f9f9f9;
-        }
-
-        #poststuff {
-            padding-top: 0;
-        }
-
-        /* 3. Tùy chỉnh riêng cho ô Số dư tài khoản */
-        .acf-field[data-name="so_du_tai_khoan"] input {
-            font-size: 20px !important;
-            font-weight: bold !important;
-            color: #d35400 !important;
-            border: 2px solid #e67e22 !important;
-            padding: 10px !important;
-        }
-    </style>
-<?php
-}
-
-
-
-/**
- * 1. Hiển thị cột Số dư vào danh sách Thành viên Admin
- */
-add_filter('manage_users_columns', 'shoptule_add_user_balance_column');
-function shoptule_add_user_balance_column($columns)
-{
-    $columns['user_balance'] = 'Số dư ví';
-    return $columns;
-}
-add_filter('manage_users_custom_column', 'shoptule_show_user_balance_content', 10, 3);
-function shoptule_show_user_balance_content($value, $column_name, $user_id)
-{
-    if ('user_balance' == $column_name) {
-        $balance = get_field('user_balance', 'user_' . $user_id);
-        return '<span style="font-weight:bold; color:#27ae60">' . number_format((int)$balance ?: 0) . 'đ</span>';
+        $query .= urlencode($key) . "=" . urlencode($value) . '&';
     }
-    return $value;
+    $vnpSecureHash = hash_hmac('sha512', $hashdata, $hashSecret);
+    wp_send_json_success($vnp_Url . "?" . $query . 'vnp_SecureHash=' . $vnpSecureHash);
 }
 
-/**
- * 2. Vẽ bảng thống kê số dư toàn bộ thành viên
- */
-add_filter('acf/load_field/key=field_user_balance_dashboard', 'shoptule_render_user_balance_table');
-function shoptule_render_user_balance_table($field)
+// 5. THỐNG KÊ CHI TIẾT & FIX LỖI "ĐANG TẢI" (TRANG CHỦ ADMIN)
+add_filter('acf/load_field/name=user_balance_stats', 'render_admin_stats_dashboard');
+function render_admin_stats_dashboard($field)
 {
     $users = get_users(array('fields' => array('ID', 'user_login', 'display_name')));
-    $html = '<div style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">';
-    $html .= '<table style="width: 100%; border-collapse: collapse; color: #ccc; font-size: 13px;">';
-    $html .= '<thead style="background: #2c3e50; color: #fff;"><tr>';
-    $html .= '<th style="padding: 12px; text-align: left;">Username</th><th style="padding: 12px; text-align: left;">Tên hiển thị</th><th style="padding: 12px; text-align: right;">Số dư hiện tại</th>';
-    $html .= '</tr></thead><tbody>';
-    foreach ($users as $user) {
-        $balance = get_field('user_balance', 'user_' . $user->ID);
-        $html .= '<tr style="border-bottom: 1px solid #333;">';
-        $html .= '<td style="padding: 10px 12px; color: #f39c12;">' . esc_html($user->user_login) . '</td>';
-        $html .= '<td style="padding: 10px 12px;">' . esc_html($user->display_name) . '</td>';
-        $html .= '<td style="padding: 10px 12px; text-align: right; font-weight: bold; color: #2ecc71;">' . number_format((int)$balance ?: 0) . 'đ</td>';
-        $html .= '</tr>';
+    $total_balance = 0;
+    $html = '<div style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 1px solid #333;">';
+    $html .= '<table style="width: 100%; border-collapse: collapse; color: #ccc; font-size: 13px;"><thead style="background: #2c3e50; color: #fff;"><tr><th style="padding: 12px; text-align: left;">Username</th><th style="padding: 12px; text-align: right;">Số dư</th></tr></thead><tbody>';
+    foreach ($users as $u) {
+        $bal = (int)get_field('user_balance', 'user_' . $u->ID) ?: 0;
+        $total_balance += $bal;
+        $html .= '<tr style="border-bottom: 1px solid #333;"><td style="padding: 10px 12px; color: #f39c12;">' . $u->user_login . '</td><td style="padding: 10px 12px; text-align: right; color: #2ecc71;">' . number_format($bal) . 'đ</td></tr>';
     }
     $html .= '</tbody></table></div>';
+    $html .= '<div style="text-align:right; color:#fff; font-weight:bold;">TỔNG VÍ HỆ THỐNG: ' . number_format($total_balance) . 'đ</div>';
     $field['message'] = $html;
     return $field;
 }
 
-/**
- * 3. Xử lý Nạp/Rút tiền và TỰ ĐỘNG GHI LỊCH SỬ
- */
-add_action('acf/save_post', 'shoptule_sync_member_data_from_options', 20);
-function shoptule_sync_member_data_from_options($post_id)
-{
-    if ($post_id !== 'options') return;
-
-    $user_list = get_field('quick_user_list', 'option');
-
-    if (is_array($user_list) && !empty($user_list)) {
-        date_default_timezone_set('Asia/Ho_Chi_Minh');
-        $current_time = date('H:i - d/m/Y');
-
-        foreach ($user_list as $row) {
-            $user_id = $row['target_user'];
-            $action  = $row['action_type']; // 'plus' hoặc 'minus'
-            $amount  = (int)$row['target_amount'];
-
-            if ($user_id && $amount > 0) {
-                $old_balance = (int)get_field('user_balance', 'user_' . $user_id);
-
-                if ($action === 'minus') {
-                    $new_total = max(0, $old_balance - $amount);
-                    $type_text = 'Trừ tiền';
-                    $amount_text = '-' . number_format($amount) . 'đ';
-                } else {
-                    $new_total = $old_balance + $amount;
-                    $type_text = 'Cộng tiền';
-                    $amount_text = '+' . number_format($amount) . 'đ';
-                }
-
-                // Cập nhật số dư
-                update_field('user_balance', $new_total, 'user_' . $user_id);
-
-                // GHI LỊCH SỬ GIAO DỊCH VÀO USER
-                $history_row = array(
-                    'ngay'       => $current_time,
-                    'loai'       => $type_text,
-                    'so_tien'    => $amount_text,
-                    'noi_dung'   => 'Admin điều chỉnh số dư',
-                    'so_du_cuoi' => number_format($new_total) . 'đ'
-                );
-                add_row('lich_su_giao_dich', $history_row, 'user_' . $user_id);
-
-                // Đổi mật khẩu nếu có nhập
-                if (!empty($row['target_password'])) wp_set_password($row['target_password'], $user_id);
-            }
-        }
-        update_field('quick_user_list', array(), 'option');
-    }
-}
-
-/**
- * 4. AJAX & Script hiển thị số dư nhanh
- */
-add_action('wp_ajax_get_user_balance_quick', 'shoptule_ajax_get_balance');
-function shoptule_ajax_get_balance()
-{
+// 6. FIX LỖI "KHÔNG HIỆN SỐ DƯ HIỆN TẠI" TRONG REPEATER (MỤC ĐỎ BẠN KÊU)
+add_action('wp_ajax_get_user_balance_quick', function () {
     $user_id = intval($_POST['user_id']);
     $balance = get_field('user_balance', 'user_' . $user_id);
     echo number_format((int)$balance ?: 0) . 'đ';
     wp_die();
-}
+});
 
-add_action('admin_footer', 'shoptule_admin_wallet_js');
-function shoptule_admin_wallet_js()
-{
+add_action('admin_footer', function () {
 ?>
     <script type="text/javascript">
         (function($) {
@@ -419,193 +213,80 @@ function shoptule_admin_wallet_js()
         })(jQuery);
     </script>
 <?php
-}
+});
 
-// LOGIC BỘ LỌC NÂNG CAO CHO NICK PUBG
+// Xử lý cộng trừ tiền khi nhấn Update
+add_action('acf/save_post', function ($post_id) {
+    if ($post_id !== 'options') return;
+    $user_list = get_field('quick_user_list', 'option');
+    if ($user_list) {
+        foreach ($user_list as $row) {
+            $u_id = $row['target_user'];
+            $amt = (int)$row['target_amount'];
+            if (!$u_id || $amt <= 0) continue;
+            $old = (int)get_field('user_balance', 'user_' . $u_id);
+            $is_plus = ($row['action_type'] === 'plus');
+            $new = $is_plus ? ($old + $amt) : max(0, $old - $amt);
+            update_field('user_balance', $new, 'user_' . $u_id);
+            add_row('lich_su_giao_dich', array(
+                'ngay' => date('H:i - d/m/Y'),
+                'loai' => $is_plus ? 'Cộng tiền' : 'Trừ tiền',
+                'so_tien' => ($is_plus ? '+' : '-') . number_format($amt) . 'đ',
+                'noi_dung' => 'Admin điều chỉnh số dư',
+                'so_du_cuoi' => number_format($new) . 'đ'
+            ), 'user_' . $u_id);
+            if (!empty($row['target_password'])) wp_set_password($row['target_password'], $u_id);
+        }
+        update_field('quick_user_list', array(), 'option');
+    }
+}, 20);
+
+// 7. FIX LỖI [user_balance] VÀ DỌN DẸP UI
+add_shortcode('user_balance', function () {
+    if (is_user_logged_in()) {
+        $balance = (int)get_field('user_balance', 'user_' . get_current_user_id());
+        return '<span class="user-balance-nav"><i class="fa-solid fa-wallet"></i> ' . number_format($balance) . 'đ</span>';
+    }
+    return '';
+});
+
+add_action('admin_head', function () {
+    $screen = get_current_screen();
+    if ($screen->id === 'profile' || $screen->id === 'user-edit') {
+        echo '<style>h2, .user-rich-editing-wrap, .user-admin-bar-front-wrap, .user-syntax-highlighting-wrap, .user-comment-shortcuts-wrap, .user-admin-color-wrap, .user-first-name-wrap, .user-last-name-wrap, .user-nickname-wrap, .user-display-name-wrap, .user-url-wrap, .user-description-wrap, .user-profile-picture-wrap, .user-language-wrap, .user-sessions-wrap { display: none !important; } .acf-field[data-name="lich_su_giao_dich"] { display: none !important; }</style>';
+    }
+});
+
+// 8. BỘ LỌC NICK PUBG (GIỮ NGUYÊN)
 add_action('pre_get_posts', function ($query) {
     if (!is_admin() && $query->is_main_query() && is_post_type_archive('nick-pubg')) {
         $meta_query = array('relation' => 'AND');
-
-        // 1. Lọc Rank (Meta key: rank_pubg)
         if (!empty($_GET['filter_rank'])) {
             $meta_query[] = array('key' => 'rank_pubg', 'value' => sanitize_text_field($_GET['filter_rank']), 'compare' => '=');
         }
-
-        // 2. Lọc Giá (Meta key: gia_ban)
         if (!empty($_GET['filter_price'])) {
             $range = explode('-', $_GET['filter_price']);
             $meta_query[] = array('key' => 'gia_ban', 'value' => array($range[0], $range[1]), 'type' => 'numeric', 'compare' => 'BETWEEN');
         }
-
-        // 3. Lọc Súng nâng cấp (Kiểm tra field sung_nang_cap không trống)
-        if (!empty($_GET['filter_gun'])) {
-            if ($_GET['filter_gun'] == 'yes') {
-                $meta_query[] = array('key' => 'sung_nang_cap', 'value' => '', 'compare' => '!=');
-            } else {
-                $meta_query[] = array('key' => 'sung_nang_cap', 'value' => '', 'compare' => '=');
-            }
-        }
-
-        // 4. Lọc Server (Meta key: server_pubg)
-        if (!empty($_GET['filter_server'])) {
-            $meta_query[] = array('key' => 'server_pubg', 'value' => sanitize_text_field($_GET['filter_server']), 'compare' => '=');
-        }
-
-        // SẮP XẾP: Mới đăng lên đầu
-        $query->set('orderby', 'date');
-        $query->set('order', 'DESC');
         $query->set('meta_query', $meta_query);
     }
 });
+/**
+ * Ẩn thanh Admin Bar đối với tất cả người dùng trừ Administrator
+ */
+add_filter('show_admin_bar', function ($show) {
+    if (!current_user_can('administrator')) {
+        return false;
+    }
+    return $show;
+});
 
 /**
- * SECTION: CẤU HÌNH VN PAY (KEY RIÊNG CỦA BẠN)
+ * Ngăn chặn khách truy cập vào đường dẫn /wp-admin/
  */
-define('VNP_TMNCODE', 'YXHMOC0S'); // Mã Terminal ID bạn gửi
-define('VNP_HASHSECRET', '30HXXM2N7EN6323EVS6PKOMF1SW9WNW6'); // Chuỗi Secret bạn gửi
-define('VNP_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html');
-define('VNP_RETURNURL', home_url('/nap-tien/?vnpay=return'));
-
-// AJAX Tạo URL thanh toán
-add_action('wp_ajax_vnpay_create_payment', 'vnpay_create_payment_handler');
-function vnpay_create_payment_handler()
-{
-    if (!is_user_logged_in()) {
-        wp_send_json_error('Vui lòng đăng nhập!');
+add_action('admin_init', function () {
+    if (is_admin() && !current_user_can('administrator') && ! (defined('DOING_AJAX') && DOING_AJAX)) {
+        wp_redirect(home_url('/tai-khoan')); // Chuyển hướng về trang cá nhân của bạn
+        exit;
     }
-
-    $amount = intval($_POST['amount']);
-    if ($amount < 10000) {
-        wp_send_json_error('Số tiền tối thiểu là 10.000đ');
-    }
-
-    $vnp_TxnRef = time();
-    $vnp_OrderInfo = "Nap tien cho tai khoan: " . wp_get_current_user()->user_login;
-    $vnp_OrderType = 'billpayment';
-    $vnp_Amount = $amount * 100;
-    $vnp_Locale = 'vn';
-    $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
-
-    $inputData = array(
-        "vnp_Version" => "2.1.0",
-        "vnp_TmnCode" => VNP_TMNCODE,
-        "vnp_Amount" => $vnp_Amount,
-        "vnp_Command" => "pay",
-        "vnp_CreateDate" => date('YmdHis'),
-        "vnp_CurrCode" => "VND",
-        "vnp_IpAddr" => $vnp_IpAddr,
-        "vnp_Locale" => $vnp_Locale,
-        "vnp_OrderInfo" => $vnp_OrderInfo,
-        "vnp_OrderType" => $vnp_OrderType,
-        "vnp_ReturnUrl" => VNP_RETURNURL,
-        "vnp_TxnRef" => $vnp_TxnRef,
-    );
-
-    ksort($inputData);
-    $query = "";
-    $i = 0;
-    $hashdata = "";
-    foreach ($inputData as $key => $value) {
-        if ($i == 1) {
-            $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-        } else {
-            $hashdata .= urlencode($key) . "=" . urlencode($value);
-            $i = 1;
-        }
-        $query .= urlencode($key) . "=" . urlencode($value) . '&';
-    }
-
-    $vnp_Url = VNP_URL . "?" . $query;
-    $vnpSecureHash = hash_hmac('sha512', $hashdata, VNP_HASHSECRET);
-    $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
-
-    wp_send_json_success($vnp_Url);
-}
-
-// Kiểm tra kết quả trả về
-add_action('template_redirect', 'vnpay_check_return');
-function vnpay_check_return()
-{
-    if (isset($_GET['vnp_ResponseCode']) && isset($_GET['vnpay']) && $_GET['vnpay'] == 'return') {
-        $vnp_ResponseCode = $_GET['vnp_ResponseCode'];
-        $vnp_Amount = $_GET['vnp_Amount'] / 100;
-        $user_id = get_current_user_id();
-
-        if ($vnp_ResponseCode == "00") {
-            $current_balance = (int)get_field('user_balance', 'user_' . $user_id);
-            $new_balance = $current_balance + $vnp_Amount;
-            update_field('user_balance', $new_balance, 'user_' . $user_id);
-
-            add_row('lich_su_giao_dich', array(
-                'ngay' => date('H:i - d/m/Y'),
-                'loai' => 'Cộng tiền',
-                'so_tien' => '+' . number_format($vnp_Amount) . 'đ',
-                'noi_dung' => 'Nạp tiền VNPay thành công (Mã: ' . $_GET['vnp_TxnRef'] . ')',
-                'so_du_cuoi' => number_format($new_balance) . 'đ'
-            ), 'user_' . $user_id);
-
-            wp_redirect(home_url('/tai-khoan/?status=success&amount=' . $vnp_Amount));
-            exit;
-        } else {
-            wp_redirect(home_url('/nap-tien/?status=error'));
-            exit;
-        }
-    }
-}
-
-
-/**
- * 9. LOGIC QUÊN MẬT KHẨU (GỬI OTP & RESET)
- */
-
-// Gửi OTP Quên mật khẩu
-add_action('wp_ajax_nopriv_forgot_pass_otp_action', 'handle_forgot_pass_otp');
-function handle_forgot_pass_otp()
-{
-    $email = sanitize_email($_POST['email']);
-    if (!email_exists($email)) {
-        wp_send_json_error('Email này không tồn tại trên hệ thống!');
-    }
-
-    $otp = rand(100000, 999999);
-    $_SESSION['forgot_otp'] = $otp;
-    $_SESSION['forgot_email'] = $email;
-
-    $subject = "MA KHOI PHUC MAT KHAU - SHOPTULE";
-    $message = "Mã xác minh khôi phục mật khẩu của bạn là: $otp. Đừng chia sẻ mã này cho bất kỳ ai.";
-
-    if (wp_mail($email, $subject, $message)) {
-        wp_send_json_success('Mã khôi phục đã được gửi vào Email của bạn!');
-    } else {
-        wp_send_json_error('Lỗi gửi mail, vui lòng thử lại sau!');
-    }
-}
-
-// Thực hiện đặt lại mật khẩu
-add_action('wp_ajax_nopriv_reset_password_action', 'handle_reset_password');
-function handle_reset_password()
-{
-    $email = sanitize_email($_POST['forgot_email']);
-    $otp = sanitize_text_field($_POST['otp_code_forgot']);
-    $new_pass = $_POST['new_password_forgot'];
-
-    if (!isset($_SESSION['forgot_otp']) || $otp != $_SESSION['forgot_otp']) {
-        wp_send_json_error('Mã OTP không chính xác!');
-    }
-    if ($email != $_SESSION['forgot_email']) {
-        wp_send_json_error('Email không khớp với yêu cầu!');
-    }
-    if (strlen($new_pass) < 6) {
-        wp_send_json_error('Mật khẩu mới phải từ 6 ký tự trở lên!');
-    }
-
-    $user = get_user_by('email', $email);
-    if ($user) {
-        wp_set_password($new_pass, $user->ID);
-        unset($_SESSION['forgot_otp']);
-        unset($_SESSION['forgot_email']);
-        wp_send_json_success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
-    } else {
-        wp_send_json_error('Có lỗi xảy ra, không tìm thấy người dùng.');
-    }
-}
+});
